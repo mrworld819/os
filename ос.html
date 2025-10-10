@@ -1,0 +1,448 @@
+ <!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Muzaffar OS</title>
+<style>
+  body { margin:0; font-family:sans-serif; background: linear-gradient(135deg,#74ebd5,#ACB6E5); overflow:hidden; }
+  #desktop { position:relative; width:100%; height:100vh; overflow:hidden; }
+  .icon { position:absolute; width:80px; text-align:center; cursor:pointer; color:#fff; font-size:12px; transition: transform 0.2s; }
+  .icon:hover { transform: scale(1.1); }
+  .icon img { width:60px; height:60px; margin-bottom:5px; }
+  .app { display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:#f0f0f0; z-index:1000; overflow:auto; transition:all 0.3s ease; }
+  .app-header { background:#1c92d2; color:#fff; padding:10px; font-size:18px; position:sticky; top:0; display:flex; justify-content:space-between; align-items:center; }
+  .close-btn { background:#fff; color:#1c92d2; border:none; font-size:18px; width:30px; height:30px; border-radius:50%; cursor:pointer; }
+  .app-body { padding:10px; }
+  input[type=text], input[type=url] { padding:8px; width:100%; margin:5px 0; border:1px solid #ccc; border-radius:4px; }
+  button { padding:8px 15px; margin:3px; cursor:pointer; border:none; border-radius:5px; background:#1c92d2; color:#fff; }
+  
+  /* Стили для настроек */
+  .setting-section { background:#fff; margin:10px 0; padding:15px; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+  .setting-title { font-weight:bold; margin-bottom:10px; color:#1c92d2; }
+  .setting-item { margin:10px 0; }
+  .url-input-group { display:flex; gap:10px; margin:10px 0; }
+  .url-input-group input { flex:1; }
+  
+  /* Стили для iframe */
+  .app-iframe { width:100%; height:90vh; border:none; }
+  
+  /* Стили для создания приложений */
+  .create-app-form { background:#f8f9fa; padding:15px; border-radius:8px; margin:10px 0; }
+  .form-group { margin:10px 0; }
+  .form-group label { display:block; margin-bottom:5px; font-weight:bold; }
+  .app-list { margin-top:20px; }
+  .app-item { display:flex; justify-content:space-between; align-items:center; padding:10px; background:#fff; margin:5px 0; border-radius:5px; border:1px solid #ddd; }
+  .delete-btn { background:#ff6b6b; color:white; border:none; padding:5px 10px; border-radius:3px; cursor:pointer; }
+  
+  /* Стили для Muzaffar Pay */
+  .pay-card { background:linear-gradient(135deg,#1c92d2,#f2fcfe); color:#fff; padding:20px; border-radius:15px; box-shadow:0 4px 10px rgba(0,0,0,0.3); width:90%; margin:0 auto 20px; }
+</style>
+</head>
+<body>
+<div id="desktop">
+  <!-- Приложения будут добавляться сюда динамически -->
+</div>
+
+<!-- ------------------------ Настройки ------------------------ -->
+<div id="settingsApp" class="app">
+  <div class="app-header">⚙️ Настройки <button class="close-btn" onclick="closeApp('settingsApp')">×</button></div>
+  <div class="app-body">
+    
+    <div class="setting-section">
+      <div class="setting-title">📱 Управление приложениями</div>
+      
+      <div class="create-app-form">
+        <h3>Создать новое приложение</h3>
+        <div class="form-group">
+          <label>Название приложения:</label>
+          <input type="text" id="appName" placeholder="Например: YouTube">
+        </div>
+        <div class="form-group">
+          <label>URL приложения:</label>
+          <input type="url" id="appUrl" placeholder="https://example.com">
+        </div>
+        <div class="form-group">
+          <label>Иконка (URL):</label>
+          <input type="url" id="appIcon" placeholder="https://img.icons8.com/fluency/96/name.png">
+          <small>Можно найти иконки на <a href="https://icons8.com" target="_blank">icons8.com</a></small>
+        </div>
+        <button onclick="createNewApp()">➕ Создать приложение</button>
+      </div>
+      
+      <div class="app-list">
+        <h3>Мои приложения</h3>
+        <div id="appsList">
+          <!-- Список приложений будет здесь -->
+        </div>
+      </div>
+    </div>
+
+    <div class="setting-section">
+      <div class="setting-title">🎨 Внешний вид</div>
+      <div class="setting-item">
+        <label>Обои:</label>
+        <select id="wallpaperSelect">
+          <option value="gradient">Градиент</option>
+          <option value="blue">Синий</option>
+          <option value="nature">Природа</option>
+          <option value="space">Космос</option>
+          <option value="dark">Темный</option>
+        </select>
+      </div>
+    </div>
+    
+    <div class="setting-section">
+      <div class="setting-title">⚡ Быстрые действия</div>
+      <button onclick="addSampleApps()">➕ Добавить примеры приложений</button>
+      <button onclick="clearAllApps()" style="background:#ff6b6b;">🗑️ Удалить все приложения</button>
+    </div>
+  </div>
+</div>
+
+<!-- ------------------------ Muzaffar Pay App ------------------------ -->
+<div id="payApp" class="app">
+  <div class="app-header">
+    💳 Muzaffar Pay
+    <button class="close-btn" onclick="closeApp('payApp')">×</button>
+  </div>
+  <div class="app-body" style="text-align:center;">
+    <div class="pay-card">
+      <h2>Muzaffar Pay</h2>
+      <p id="balance" style="font-size:24px;font-weight:bold;">0 ₮</p>
+    </div>
+
+    <div>
+      <input id="amount" type="number" placeholder="Сумма перевода">
+      <br>
+      <button onclick="generateCode()">Создать код</button>
+      <button onclick="applyCode()">Получить перевод</button>
+    </div>
+
+    <div id="transferCode" style="margin-top:15px;font-weight:bold;color:#1c92d2;"></div>
+
+    <hr style="margin:20px 0;border:none;height:1px;background:#ddd;">
+
+    <h3>История</h3>
+    <ul id="history" style="list-style:none;padding:0;max-height:200px;overflow-y:auto;"></ul>
+  </div>
+</div>
+
+<script>
+  // ------------------------ Глобальные переменные ------------------------
+  let userApps = JSON.parse(localStorage.getItem('muzaffar_user_apps') || '[]');
+  let nextPosition = { x: 40, y: 40 };
+  const GRID_SIZE = 100;
+
+  // ------------------------ Инициализация ------------------------
+  document.addEventListener('DOMContentLoaded', function() {
+    loadUserApps();
+    updateAppsList();
+  });
+
+  // ------------------------ Управление приложениями ------------------------
+  function loadUserApps() {
+    const desktop = document.getElementById('desktop');
+    
+    // Очищаем десктоп (кроме настроек и Muzaffar Pay)
+    const existingIcons = desktop.querySelectorAll('.icon:not(#settingsIcon):not(#payIcon)');
+    existingIcons.forEach(icon => icon.remove());
+    
+    // Добавляем приложения пользователя
+    userApps.forEach(app => {
+      createAppIcon(app);
+    });
+    
+    // Добавляем фиксированные приложения (Настройки и Muzaffar Pay)
+    createFixedApps();
+  }
+
+  function createAppIcon(app) {
+    const desktop = document.getElementById('desktop');
+    const icon = document.createElement('div');
+    icon.className = 'icon';
+    icon.style.left = app.position.x + 'px';
+    icon.style.top = app.position.y + 'px';
+    icon.setAttribute('data-app-id', app.id);
+    
+    icon.innerHTML = `
+      <img src="${app.icon}" alt="${app.name}">
+      <div>${app.name}</div>
+    `;
+    
+    icon.onclick = () => openCustomApp(app);
+    desktop.appendChild(icon);
+    
+    // Создаем iframe для приложения
+    createAppIframe(app);
+  }
+
+  function createAppIframe(app) {
+    const iframe = document.createElement('iframe');
+    iframe.id = `appFrame_${app.id}`;
+    iframe.className = 'app-iframe';
+    iframe.src = app.url;
+    
+    const appContainer = document.createElement('div');
+    appContainer.id = `app_${app.id}`;
+    appContainer.className = 'app';
+    appContainer.innerHTML = `
+      <div class="app-header">
+        ${app.name}
+        <button class="close-btn" onclick="closeApp('app_${app.id}')">×</button>
+      </div>
+      <div class="app-body"></div>
+    `;
+    
+    appContainer.querySelector('.app-body').appendChild(iframe);
+    document.body.appendChild(appContainer);
+  }
+
+  function createFixedApps() {
+    const desktop = document.getElementById('desktop');
+    
+    // Настройки
+    const settingsIcon = document.createElement('div');
+    settingsIcon.className = 'icon';
+    settingsIcon.style.left = '40px';
+    settingsIcon.style.top = '40px';
+    settingsIcon.innerHTML = `
+      <img src="https://img.icons8.com/fluency/96/settings.png" alt="Настройки">
+      <div>Настройки</div>
+    `;
+    settingsIcon.onclick = () => openApp('settingsApp');
+    desktop.appendChild(settingsIcon);
+    
+    // Muzaffar Pay
+    const payIcon = document.createElement('div');
+    payIcon.className = 'icon';
+    payIcon.style.left = '140px';
+    payIcon.style.top = '40px';
+    payIcon.innerHTML = `
+      <img src="https://img.icons8.com/fluency/96/bank-cards.png" alt="Muzaffar Pay">
+      <div>Muzaffar Pay</div>
+    `;
+    payIcon.onclick = () => openApp('payApp');
+    desktop.appendChild(payIcon);
+  }
+
+  function createNewApp() {
+    const name = document.getElementById('appName').value.trim();
+    const url = document.getElementById('appUrl').value.trim();
+    const icon = document.getElementById('appIcon').value.trim() || 'https://img.icons8.com/fluency/96/application.png';
+    
+    if (!name || !url) {
+      alert('Пожалуйста, заполните название и URL приложения');
+      return;
+    }
+    
+    // Генерируем новую позицию
+    const position = getNextPosition();
+    
+    const newApp = {
+      id: Date.now().toString(),
+      name: name,
+      url: url,
+      icon: icon,
+      position: position
+    };
+    
+    userApps.push(newApp);
+    saveUserApps();
+    createAppIcon(newApp);
+    updateAppsList();
+    
+    // Очищаем форму
+    document.getElementById('appName').value = '';
+    document.getElementById('appUrl').value = '';
+    document.getElementById('appIcon').value = '';
+    
+    alert(`Приложение "${name}" создано!`);
+  }
+
+  function getNextPosition() {
+    const positions = userApps.map(app => app.position);
+    let x = 40, y = 140;
+    let foundPosition = false;
+    
+    while (!foundPosition) {
+      const positionExists = positions.some(pos => pos.x === x && pos.y === y);
+      if (!positionExists) {
+        foundPosition = true;
+      } else {
+        x += GRID_SIZE;
+        if (x > 500) {
+          x = 40;
+          y += GRID_SIZE;
+        }
+      }
+    }
+    
+    return { x: x, y: y };
+  }
+
+  function deleteApp(appId) {
+    if (confirm('Вы уверены, что хотите удалить это приложение?')) {
+      userApps = userApps.filter(app => app.id !== appId);
+      saveUserApps();
+      
+      // Удаляем иконку
+      const icon = document.querySelector(`[data-app-id="${appId}"]`);
+      if (icon) icon.remove();
+      
+      // Удаляем iframe
+      const appContainer = document.getElementById(`app_${appId}`);
+      if (appContainer) appContainer.remove();
+      
+      updateAppsList();
+    }
+  }
+
+  function updateAppsList() {
+    const appsList = document.getElementById('appsList');
+    appsList.innerHTML = '';
+    
+    if (userApps.length === 0) {
+      appsList.innerHTML = '<p>У вас пока нет приложений</p>';
+      return;
+    }
+    
+    userApps.forEach(app => {
+      const appItem = document.createElement('div');
+      appItem.className = 'app-item';
+      appItem.innerHTML = `
+        <div>
+          <strong>${app.name}</strong><br>
+          <small>${app.url}</small>
+        </div>
+        <button class="delete-btn" onclick="deleteApp('${app.id}')">Удалить</button>
+      `;
+      appsList.appendChild(appItem);
+    });
+  }
+
+  function saveUserApps() {
+    localStorage.setItem('muzaffar_user_apps', JSON.stringify(userApps));
+  }
+
+  // ------------------------ Управление окнами ------------------------
+  function openApp(id) {
+    document.getElementById(id).style.display = 'block';
+  }
+
+  function openCustomApp(app) {
+    document.getElementById(`app_${app.id}`).style.display = 'block';
+  }
+
+  function closeApp(id) {
+    document.getElementById(id).style.display = 'none';
+  }
+
+  // ------------------------ Вспомогательные функции ------------------------
+  function addSampleApps() {
+    const sampleApps = [
+      {
+        name: 'YouTube',
+        url: 'https://www.youtube.com',
+        icon: 'https://img.icons8.com/color/96/youtube-play.png'
+      },
+      {
+        name: 'Google',
+        url: 'https://www.google.com',
+        icon: 'https://img.icons8.com/color/96/google-logo.png'
+      },
+      {
+        name: 'Gmail',
+        url: 'https://mail.google.com',
+        icon: 'https://img.icons8.com/color/96/gmail.png'
+      }
+    ];
+    
+    sampleApps.forEach(appData => {
+      const position = getNextPosition();
+      const newApp = {
+        id: Date.now().toString() + Math.random(),
+        name: appData.name,
+        url: appData.url,
+        icon: appData.icon,
+        position: position
+      };
+      userApps.push(newApp);
+      createAppIcon(newApp);
+    });
+    
+    saveUserApps();
+    updateAppsList();
+    alert('Примеры приложений добавлены!');
+  }
+
+  function clearAllApps() {
+    if (confirm('Вы уверены, что хотите удалить ВСЕ приложения?')) {
+      userApps = [];
+      saveUserApps();
+      loadUserApps();
+      updateAppsList();
+      alert('Все приложения удалены!');
+    }
+  }
+
+  // ------------------------ Muzaffar Pay ------------------------
+  let balance = parseFloat(localStorage.getItem('muzaffar_balance')) || 1000;
+  let history = JSON.parse(localStorage.getItem('muzaffar_history') || '[]');
+
+  function updatePayUI(){
+    document.getElementById('balance').textContent = balance.toFixed(2) + " ₮";
+    const list = document.getElementById('history');
+    list.innerHTML = history.map(h=>`<li>${h}</li>`).join('');
+    localStorage.setItem('muzaffar_balance', balance);
+    localStorage.setItem('muzaffar_history', JSON.stringify(history));
+  }
+  updatePayUI();
+
+  function generateCode(){
+    const amount=parseFloat(document.getElementById('amount').value);
+    if(!amount||amount<=0||amount>balance){alert('Неверная сумма');return;}
+    balance-=amount;
+    const code="MPAY-"+Math.random().toString(36).substring(2,7).toUpperCase()+"-"+amount;
+    document.getElementById('transferCode').textContent="Код перевода: "+code;
+    history.unshift(`Отправлено ${amount} ₮ (${code})`);
+    updatePayUI();
+  }
+
+  function applyCode(){
+    const code=prompt("Введите код перевода:");
+    if(!code||!code.startsWith("MPAY-"))return;
+    const parts=code.split("-");
+    const amount=parseFloat(parts[2]);
+    if(!amount||isNaN(amount)){alert("Некорректный код");return;}
+    balance+=amount;
+    history.unshift(`Получено ${amount} ₮ (${code})`);
+    updatePayUI();
+  }
+
+  // ------------------------ Обои ------------------------
+  document.getElementById('wallpaperSelect').addEventListener('change', function() {
+    const wallpaper = this.value;
+    let gradient = 'linear-gradient(135deg,#74ebd5,#ACB6E5)';
+    
+    if (wallpaper === 'blue') {
+      gradient = 'linear-gradient(135deg,#1c92d2,#f2fcfe)';
+    } else if (wallpaper === 'nature') {
+      gradient = 'linear-gradient(135deg,#56ab2f,#a8e063)';
+    } else if (wallpaper === 'space') {
+      gradient = 'linear-gradient(135deg,#0f2027,#203a43,#2c5364)';
+    } else if (wallpaper === 'dark') {
+      gradient = 'linear-gradient(135deg,#2c3e50,#34495e)';
+    }
+    
+    document.body.style.background = gradient;
+    localStorage.setItem('muzaffar_wallpaper', wallpaper);
+  });
+  
+  // Загружаем сохраненные обои
+  const savedWallpaper = localStorage.getItem('muzaffar_wallpaper') || 'gradient';
+  document.getElementById('wallpaperSelect').value = savedWallpaper;
+  document.getElementById('wallpaperSelect').dispatchEvent(new Event('change'));
+</script>
+</body>
+</html>
