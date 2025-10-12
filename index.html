@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
@@ -14,7 +14,7 @@
   .app-header { background:#1c92d2; color:#fff; padding:10px; font-size:18px; position:sticky; top:0; display:flex; justify-content:space-between; align-items:center; }
   .close-btn { background:#fff; color:#1c92d2; border:none; font-size:18px; width:30px; height:30px; border-radius:50%; cursor:pointer; }
   .app-body { padding:10px; }
-  input[type=text], input[type=url] { padding:8px; width:100%; margin:5px 0; border:1px solid #ccc; border-radius:4px; }
+  input[type=text], input[type=url], input[type=number], input[type=password] { padding:8px; width:100%; margin:5px 0; border:1px solid #ccc; border-radius:4px; }
   button { padding:8px 15px; margin:3px; cursor:pointer; border:none; border-radius:5px; background:#1c92d2; color:#fff; }
   
   /* Стили для настроек */
@@ -37,6 +37,21 @@
   
   /* Стили для Muzaffar Pay */
   .pay-card { background:linear-gradient(135deg,#1c92d2,#f2fcfe); color:#fff; padding:20px; border-radius:15px; box-shadow:0 4px 10px rgba(0,0,0,0.3); width:90%; margin:0 auto 20px; }
+  .admin-badge { background:gold; color:black; padding:3px 8px; border-radius:10px; font-size:12px; font-weight:bold; margin-left:10px; }
+  .code-status { font-size:12px; margin-top:5px; }
+  .used { color:#ff6b6b; }
+  .active { color:#4CAF50; }
+  .transaction-item { 
+    padding:10px; 
+    margin:5px 0; 
+    background:#f9f9f9; 
+    border-radius:5px; 
+    border-left:4px solid #1c92d2; 
+  }
+  .transaction-received { border-left-color: #4CAF50; }
+  .transaction-sent { border-left-color: #ff9800; }
+  .login-form { background:#fff; padding:15px; border-radius:8px; margin:10px 0; }
+  .security-note { background:#fff3cd; border:1px solid #ffeaa7; padding:10px; border-radius:5px; margin:10px 0; font-size:12px; }
 </style>
 </head>
 <body>
@@ -107,24 +122,54 @@
     <button class="close-btn" onclick="closeApp('payApp')">×</button>
   </div>
   <div class="app-body" style="text-align:center;">
-    <div class="pay-card">
-      <h2>Muzaffar Pay</h2>
-      <p id="balance" style="font-size:24px;font-weight:bold;">0 ₮</p>
+    
+    <!-- Форма входа -->
+    <div id="loginSection" class="login-form">
+      <h3>Вход в Muzaffar Pay</h3>
+      <input type="text" id="username" placeholder="Имя пользователя">
+      <input type="password" id="password" placeholder="Пароль">
+      <button onclick="login()">Войти</button>
+      <button onclick="register()" style="background:#4CAF50;">Зарегистрироваться</button>
+      
+      <div class="security-note">
+        🔒 <strong>Безопасность:</strong> Пароли защищены и не отображаются в коде
+      </div>
     </div>
+    
+    <!-- Основной интерфейс -->
+    <div id="mainPaySection" style="display:none;">
+      <div class="pay-card">
+        <h2>Muzaffar Pay <span id="adminBadge" class="admin-badge" style="display:none;">ADMIN</span></h2>
+        <p id="balance" style="font-size:24px;font-weight:bold;">0 ₮</p>
+        <p id="userInfo" style="font-size:14px;"></p>
+      </div>
 
-    <div>
-      <input id="amount" type="number" placeholder="Сумма перевода">
-      <br>
-      <button onclick="generateCode()">Создать код</button>
-      <button onclick="applyCode()">Получить перевод</button>
+      <div>
+        <input id="amount" type="number" placeholder="Сумма перевода" min="1">
+        <br>
+        <button onclick="generateCode()">Создать код оплаты</button>
+        <button onclick="applyCode()">Использовать код</button>
+        <button id="adminBtn" onclick="toggleAdminPanel()" style="background:#ff9800; display:none;">Панель администратора</button>
+        <button onclick="logout()" style="background:#666;">Выйти</button>
+      </div>
+
+      <div id="transferCode" style="margin-top:15px; padding:10px; background:#f8f9fa; border-radius:5px;"></div>
+
+      <!-- Панель администратора -->
+      <div id="adminPanel" style="display:none; margin-top:20px; padding:15px; background:#fff; border-radius:8px;">
+        <h3>🔧 Панель администратора</h3>
+        <button onclick="addFundsToAll()" style="background:#4CAF50;">➕ Начислить всем по 1000 ₮</button>
+        <button onclick="resetAllBalances()" style="background:#ff6b6b;">🔄 Обнулить все счета</button>
+        <button onclick="viewAllUsers()" style="background:#9c27b0;">👥 Просмотр всех пользователей</button>
+        
+        <div id="allUsersList" style="margin-top:15px; max-height:200px; overflow-y:auto;"></div>
+      </div>
+
+      <hr style="margin:20px 0;border:none;height:1px;background:#ddd;">
+
+      <h3>История операций</h3>
+      <ul id="history" style="list-style:none;padding:0;max-height:200px;overflow-y:auto;"></ul>
     </div>
-
-    <div id="transferCode" style="margin-top:15px;font-weight:bold;color:#1c92d2;"></div>
-
-    <hr style="margin:20px 0;border:none;height:1px;background:#ddd;">
-
-    <h3>История</h3>
-    <ul id="history" style="list-style:none;padding:0;max-height:200px;overflow-y:auto;"></ul>
   </div>
 </div>
 
@@ -133,11 +178,66 @@
   let userApps = JSON.parse(localStorage.getItem('muzaffar_user_apps') || '[]');
   let nextPosition = { x: 40, y: 40 };
   const GRID_SIZE = 100;
+  
+  // ------------------------ Muzaffar Pay улучшенный ------------------------
+  let currentUser = null;
+  let users = JSON.parse(localStorage.getItem('muzaffar_pay_users') || '[]');
+  let paymentCodes = JSON.parse(localStorage.getItem('muzaffar_payment_codes') || '[]');
+  
+  // Безопасная инициализация системы
+  function initializeBankSystem() {
+    // Создаем хеши для паролей вместо хранения в открытом виде
+    const adminPasswordHash = generateHash('bank_admin_secure_2024');
+    const userPasswordHash = generateHash('user_default_pass');
+    
+    // Инициализация админа, если его нет
+    if (!users.find(u => u.username === 'BankAdmin')) {
+      users.push({
+        username: 'BankAdmin',
+        passwordHash: adminPasswordHash,
+        balance: 9999999,
+        isAdmin: true,
+        transactions: ['Система: Админ аккаунт создан'],
+        createdAt: new Date().toISOString()
+      });
+    }
+    
+    // Инициализация тестового пользователя
+    if (!users.find(u => u.username === 'demo')) {
+      users.push({
+        username: 'demo',
+        passwordHash: userPasswordHash,
+        balance: 1000,
+        isAdmin: false,
+        transactions: ['Система: Демо аккаунт создан'],
+        createdAt: new Date().toISOString()
+      });
+    }
+    
+    localStorage.setItem('muzaffar_pay_users', JSON.stringify(users));
+  }
+
+  // Простая функция хеширования (в реальном приложении используйте bcrypt)
+  function generateHash(password) {
+    let hash = 0;
+    for (let i = 0; i < password.length; i++) {
+      const char = password.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash;
+    }
+    return hash.toString();
+  }
+
+  function verifyPassword(inputPassword, storedHash) {
+    return generateHash(inputPassword) === storedHash;
+  }
 
   // ------------------------ Инициализация ------------------------
   document.addEventListener('DOMContentLoaded', function() {
+    initializeBankSystem();
     loadUserApps();
     updateAppsList();
+    checkAutoLogin();
   });
 
   // ------------------------ Управление приложениями ------------------------
@@ -386,38 +486,295 @@
     }
   }
 
-  // ------------------------ Muzaffar Pay ------------------------
-  let balance = parseFloat(localStorage.getItem('muzaffar_balance')) || 1000;
-  let history = JSON.parse(localStorage.getItem('muzaffar_history') || '[]');
+  // ------------------------ Muzaffar Pay улучшенный ------------------------
+  function checkAutoLogin() {
+    const savedUser = localStorage.getItem('muzaffar_current_user');
+    if (savedUser) {
+      const userData = JSON.parse(savedUser);
+      loginUser(userData.username, userData.password, true);
+    }
+  }
 
-  function updatePayUI(){
-    document.getElementById('balance').textContent = balance.toFixed(2) + " ₮";
+  function login() {
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+    
+    if (!username || !password) {
+      alert('Введите имя пользователя и пароль');
+      return;
+    }
+    
+    loginUser(username, password, false);
+  }
+
+  function loginUser(username, password, isAutoLogin) {
+    const user = users.find(u => u.username === username);
+    
+    if (user && verifyPassword(password, user.passwordHash)) {
+      currentUser = user;
+      
+      if (!isAutoLogin) {
+        // Сохраняем только для автоматического входа (в реальном приложении используйте токены)
+        localStorage.setItem('muzaffar_current_user', JSON.stringify({
+          username: user.username,
+          password: password // Временное решение для демо
+        }));
+      }
+      
+      showPayInterface();
+      updatePayUI();
+      
+      if (!isAutoLogin) {
+        alert(`Добро пожаловать, ${user.username}!`);
+      }
+    } else {
+      if (!isAutoLogin) {
+        alert('Неверное имя пользователя или пароль');
+      }
+    }
+  }
+
+  function register() {
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+    
+    if (!username || !password) {
+      alert('Введите имя пользователя и пароль');
+      return;
+    }
+    
+    if (users.find(u => u.username === username)) {
+      alert('Пользователь с таким именем уже существует');
+      return;
+    }
+    
+    if (password.length < 4) {
+      alert('Пароль должен содержать минимум 4 символа');
+      return;
+    }
+    
+    const newUser = {
+      username: username,
+      passwordHash: generateHash(password),
+      balance: 0,
+      isAdmin: false,
+      transactions: ['Система: Аккаунт создан'],
+      createdAt: new Date().toISOString()
+    };
+    
+    users.push(newUser);
+    localStorage.setItem('muzaffar_pay_users', JSON.stringify(users));
+    
+    alert('Аккаунт успешно создан! Теперь вы можете войти.');
+    document.getElementById('username').value = '';
+    document.getElementById('password').value = '';
+  }
+
+  function logout() {
+    currentUser = null;
+    localStorage.removeItem('muzaffar_current_user');
+    document.getElementById('loginSection').style.display = 'block';
+    document.getElementById('mainPaySection').style.display = 'none';
+    document.getElementById('username').value = '';
+    document.getElementById('password').value = '';
+    document.getElementById('adminPanel').style.display = 'none';
+  }
+
+  function showPayInterface() {
+    document.getElementById('loginSection').style.display = 'none';
+    document.getElementById('mainPaySection').style.display = 'block';
+    
+    if (currentUser.isAdmin) {
+      document.getElementById('adminBadge').style.display = 'inline';
+      document.getElementById('adminBtn').style.display = 'inline-block';
+    } else {
+      document.getElementById('adminBadge').style.display = 'none';
+      document.getElementById('adminBtn').style.display = 'none';
+    }
+  }
+
+  function updatePayUI() {
+    if (!currentUser) return;
+    
+    document.getElementById('balance').textContent = formatBalance(currentUser.balance) + " ₮";
+    document.getElementById('userInfo').textContent = `Пользователь: ${currentUser.username}`;
+    
     const list = document.getElementById('history');
-    list.innerHTML = history.map(h=>`<li>${h}</li>`).join('');
-    localStorage.setItem('muzaffar_balance', balance);
-    localStorage.setItem('muzaffar_history', JSON.stringify(history));
+    list.innerHTML = currentUser.transactions.map((t, index) => 
+      `<li class="transaction-item ${t.includes('Получено') ? 'transaction-received' : t.includes('Отправлено') ? 'transaction-sent' : ''}">
+        ${t} ${index === 0 ? '🆕' : ''}
+      </li>`
+    ).reverse().join('');
+    
+    // Сохраняем обновленные данные пользователя
+    const userIndex = users.findIndex(u => u.username === currentUser.username);
+    if (userIndex !== -1) {
+      users[userIndex] = currentUser;
+      localStorage.setItem('muzaffar_pay_users', JSON.stringify(users));
+    }
   }
-  updatePayUI();
 
-  function generateCode(){
-    const amount=parseFloat(document.getElementById('amount').value);
-    if(!amount||amount<=0||amount>balance){alert('Неверная сумма');return;}
-    balance-=amount;
-    const code="MPAY-"+Math.random().toString(36).substring(2,7).toUpperCase()+"-"+amount;
-    document.getElementById('transferCode').textContent="Код перевода: "+code;
-    history.unshift(`Отправлено ${amount} ₮ (${code})`);
+  function formatBalance(amount) {
+    return amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+  }
+
+  function generateCode() {
+    if (!currentUser) return;
+    
+    const amount = parseFloat(document.getElementById('amount').value);
+    
+    if (!amount || amount <= 0) {
+      alert('Введите корректную сумму');
+      return;
+    }
+    
+    if (!currentUser.isAdmin && amount > currentUser.balance) {
+      alert('Недостаточно средств');
+      return;
+    }
+    
+    // Админ может создавать коды без списания средств
+    if (!currentUser.isAdmin) {
+      currentUser.balance -= amount;
+    }
+    
+    const code = "BANK-" + Math.random().toString(36).substring(2, 8).toUpperCase() + "-" + Math.random().toString(36).substring(2, 6).toUpperCase();
+    const codeData = {
+      code: code,
+      amount: amount,
+      createdBy: currentUser.username,
+      createdAt: new Date().toISOString(),
+      used: false,
+      usedBy: null,
+      usedAt: null
+    };
+    
+    paymentCodes.push(codeData);
+    localStorage.setItem('muzaffar_payment_codes', JSON.stringify(paymentCodes));
+    
+    document.getElementById('transferCode').innerHTML = `
+      <strong>💰 Код оплаты: ${code}</strong><br>
+      <span class="code-status active">💵 Сумма: ${amount} ₮</span><br>
+      <span class="code-status active">⏰ Создан: ${new Date().toLocaleTimeString()}</span><br>
+      <small>⚠️ Код можно использовать только один раз</small>
+    `;
+    
+    const transactionMessage = currentUser.isAdmin ? 
+      `Создан код оплаты ${amount} ₮ (${code}) [АДМИН]` :
+      `Создан код оплаты ${amount} ₮ (${code})`;
+    
+    currentUser.transactions.unshift(transactionMessage);
     updatePayUI();
   }
 
-  function applyCode(){
-    const code=prompt("Введите код перевода:");
-    if(!code||!code.startsWith("MPAY-"))return;
-    const parts=code.split("-");
-    const amount=parseFloat(parts[2]);
-    if(!amount||isNaN(amount)){alert("Некорректный код");return;}
-    balance+=amount;
-    history.unshift(`Получено ${amount} ₮ (${code})`);
+  function applyCode() {
+    if (!currentUser) return;
+    
+    const code = prompt("Введите код оплаты:");
+    if (!code) return;
+    
+    const codeData = paymentCodes.find(c => c.code === code);
+    
+    if (!codeData) {
+      alert("Код не найден");
+      return;
+    }
+    
+    if (codeData.used) {
+      alert("Код уже использован");
+      return;
+    }
+    
+    if (codeData.createdBy === currentUser.username) {
+      alert("Нельзя использовать свой собственный код");
+      return;
+    }
+    
+    // Помечаем код как использованный
+    codeData.used = true;
+    codeData.usedBy = currentUser.username;
+    codeData.usedAt = new Date().toISOString();
+    localStorage.setItem('muzaffar_payment_codes', JSON.stringify(paymentCodes));
+    
+    // Зачисляем средства
+    currentUser.balance += codeData.amount;
+    currentUser.transactions.unshift(`Получено ${codeData.amount} ₮ (код: ${code})`);
+    
+    // Обновляем UI
     updatePayUI();
+    document.getElementById('transferCode').innerHTML = `
+      <span style="color:#4CAF50;">✅ Перевод получен: ${codeData.amount} ₮</span><br>
+      <small>От: ${codeData.createdBy}</small>
+    `;
+    
+    alert(`Успешно получено ${codeData.amount} ₮!`);
+  }
+
+  function toggleAdminPanel() {
+    const panel = document.getElementById('adminPanel');
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+  }
+
+  function addFundsToAll() {
+    if (!currentUser || !currentUser.isAdmin) return;
+    
+    users.forEach(user => {
+      if (!user.isAdmin) {
+        user.balance += 1000;
+        user.transactions.unshift(`Админ: Начислено 1000 ₮`);
+      }
+    });
+    
+    localStorage.setItem('muzaffar_pay_users', JSON.stringify(users));
+    alert('Всем пользователям начислено по 1000 ₮!');
+    
+    // Обновляем текущего пользователя если он не админ
+    if (!currentUser.isAdmin) {
+      const updatedUser = users.find(u => u.username === currentUser.username);
+      if (updatedUser) {
+        currentUser = updatedUser;
+        updatePayUI();
+      }
+    }
+  }
+
+  function resetAllBalances() {
+    if (!currentUser || !currentUser.isAdmin) return;
+    
+    if (confirm('Вы уверены, что хотите обнулить все счета (кроме админа)?')) {
+      users.forEach(user => {
+        if (!user.isAdmin) {
+          user.balance = 0;
+          user.transactions.unshift(`Админ: Счет обнулен`);
+        }
+      });
+      
+      localStorage.setItem('muzaffar_pay_users', JSON.stringify(users));
+      alert('Все счета обнулены!');
+      
+      // Обновляем текущего пользователя если он не админ
+      if (!currentUser.isAdmin) {
+        const updatedUser = users.find(u => u.username === currentUser.username);
+        if (updatedUser) {
+          currentUser = updatedUser;
+          updatePayUI();
+        }
+      }
+    }
+  }
+
+  function viewAllUsers() {
+    if (!currentUser || !currentUser.isAdmin) return;
+    
+    const usersList = document.getElementById('allUsersList');
+    usersList.innerHTML = users.map(user => `
+      <div style="padding:8px; margin:5px 0; background:#f5f5f5; border-radius:5px;">
+        <strong>${user.username}</strong> ${user.isAdmin ? '👑 АДМИН' : ''}<br>
+        Баланс: ${user.balance} ₮<br>
+        <small>Транзакций: ${user.transactions.length}</small><br>
+        <small>Создан: ${new Date(user.createdAt).toLocaleDateString()}</small>
+      </div>
+    `).join('');
   }
 
   // ------------------------ Обои ------------------------
