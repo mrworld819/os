@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Muzaffar Pay - Банковская система</title>
+    <title>Muzaffar Pay - Меж устройственная версия</title>
     <style>
         * {
             margin: 0;
@@ -113,17 +113,9 @@
             color: white;
         }
 
-        .btn-primary:hover {
-            background: #167bb0;
-        }
-
         .btn-success {
             background: #4CAF50;
             color: white;
-        }
-
-        .btn-success:hover {
-            background: #45a049;
         }
 
         .btn-warning {
@@ -142,7 +134,7 @@
 
         .code-text {
             font-family: 'Courier New', monospace;
-            font-size: 20px;
+            font-size: 18px;
             font-weight: bold;
             color: #1c92d2;
             margin: 10px 0;
@@ -164,17 +156,20 @@
             border-left-color: #4CAF50;
         }
 
-        .transaction.sent {
-            border-left-color: #ff9800;
-        }
-
         .info-box {
             background: #e7f3ff;
             border: 1px solid #b3d9ff;
             border-radius: 10px;
             padding: 15px;
             margin: 15px 0;
-            text-align: center;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
         }
 
         .login-section {
@@ -184,21 +179,13 @@
         .main-section {
             display: none;
         }
-
-        .test-accounts {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            border-radius: 10px;
-            padding: 15px;
-            margin: 15px 0;
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>💳 Muzaffar Pay</h1>
-            <p>Безопасная банковская система</p>
+            <p>Меж устройственные переводы</p>
         </div>
 
         <div class="content">
@@ -207,20 +194,21 @@
                 <h3 style="text-align: center; margin-bottom: 20px;">Вход в систему</h3>
                 
                 <div class="form-group">
-                    <input type="text" id="username" placeholder="Имя пользователя" required>
+                    <input type="text" id="username" placeholder="Имя пользователя">
                 </div>
                 <div class="form-group">
-                    <input type="password" id="password" placeholder="Пароль" required>
+                    <input type="password" id="password" placeholder="Пароль">
                 </div>
                 
                 <button class="btn-primary" onclick="login()">Войти</button>
                 <button class="btn-success" onclick="register()">Зарегистрироваться</button>
 
-                <div class="test-accounts">
-                    <h4>📋 Тестовые аккаунты:</h4>
-                    <p><strong>Админ:</strong> admin / admin123</p>
-                    <p><strong>Пользователь:</strong> user / user123</p>
-                    <p style="font-size: 12px; color: #666;">Или создайте свой аккаунт</p>
+                <div class="warning-box">
+                    <h4>⚠️ Важная информация:</h4>
+                    <p>Для работы между устройствами используйте <strong>одинаковые логины и пароли</strong> на всех устройствах.</p>
+                    <p style="margin-top: 10px;"><strong>Тестовые аккаунты:</strong></p>
+                    <p>👑 Админ: admin / admin123</p>
+                    <p>👤 Пользователь: user / user123</p>
                 </div>
             </div>
 
@@ -240,10 +228,13 @@
                 </div>
 
                 <div class="info-box">
-                    💡 <strong>Как переводить деньги:</strong><br>
-                    1. Создайте код оплаты<br>
-                    2. Дайте код другому пользователю<br>
-                    3. Он введет код и получит деньги
+                    <h4>💡 Как переводить между устройствами:</h4>
+                    <ol style="margin-left: 20px; margin-top: 10px;">
+                        <li>Создайте код на устройстве 1</li>
+                        <li>Запомните или скопируйте код</li>
+                        <li>На устройстве 2 войдите в <strong>ТОТ ЖЕ АККАУНТ</strong></li>
+                        <li>Используйте код на устройстве 2</li>
+                    </ol>
                 </div>
 
                 <!-- Форма операций -->
@@ -260,8 +251,17 @@
                     <div class="code-text" id="codeText">BANK-XXXX-XXXX</div>
                     <div style="font-size: 14px; color: #666; margin-top: 10px;">
                         💰 Сумма: <span id="codeAmount">0</span> ₮<br>
-                        ⚠️ Дайте этот код другому пользователю
+                        📱 Дайте этот код на другом устройстве<br>
+                        ⚠️ Используйте в течение 5 минут
                     </div>
+                </div>
+
+                <!-- Секция для меж устройственных операций -->
+                <div class="warning-box">
+                    <h4>🔄 Синхронизация между устройствами</h4>
+                    <p>Если баланс не совпадает на разных устройствах:</p>
+                    <button class="btn-warning" onclick="forceSync()">🔄 Принудительная синхронизация</button>
+                    <button class="btn-primary" onclick="showSyncHelp()" style="margin-top: 10px;">📖 Инструкция по синхронизации</button>
                 </div>
 
                 <!-- История операций -->
@@ -272,7 +272,6 @@
                     </div>
                 </div>
 
-                <!-- Кнопка выхода -->
                 <button class="btn-warning" onclick="logout()" style="margin-top: 20px;">Выйти из аккаунта</button>
             </div>
         </div>
@@ -284,12 +283,12 @@
         let users = JSON.parse(localStorage.getItem('muzaffar_users')) || [];
         let paymentCodes = JSON.parse(localStorage.getItem('muzaffar_payment_codes')) || [];
 
-        // Инициализация системы при загрузке
+        // Инициализация системы
         function initializeSystem() {
             // Создаем тестовые аккаунты если их нет
             if (!users.find(u => u.username === 'admin')) {
                 users.push({
-                    id: generateId(),
+                    id: 'admin',
                     username: 'admin',
                     password: 'admin123',
                     balance: 999999,
@@ -299,7 +298,8 @@
                         type: 'system',
                         amount: 0,
                         description: 'Админ аккаунт создан',
-                        date: new Date().toISOString()
+                        date: new Date().toISOString(),
+                        device: 'system'
                     }],
                     createdAt: new Date().toISOString()
                 });
@@ -307,7 +307,7 @@
 
             if (!users.find(u => u.username === 'user')) {
                 users.push({
-                    id: generateId(),
+                    id: 'user',
                     username: 'user',
                     password: 'user123',
                     balance: 1000,
@@ -317,17 +317,26 @@
                         type: 'system',
                         amount: 0,
                         description: 'Аккаунт создан',
-                        date: new Date().toISOString()
+                        date: new Date().toISOString(),
+                        device: 'system'
                     }],
                     createdAt: new Date().toISOString()
                 });
             }
 
+            // Очищаем старые коды (старше 5 минут)
+            cleanupOldCodes();
+            
             saveData();
         }
 
-        function generateId() {
-            return Date.now().toString() + Math.random().toString(36).substr(2, 9);
+        function cleanupOldCodes() {
+            const now = new Date();
+            paymentCodes = paymentCodes.filter(code => {
+                const codeDate = new Date(code.createdAt);
+                const diffMinutes = (now - codeDate) / (1000 * 60);
+                return diffMinutes < 5; // 5 минут
+            });
         }
 
         function saveData() {
@@ -350,13 +359,8 @@
                 return;
             }
 
-            if (password.length < 4) {
-                alert('Пароль должен содержать минимум 4 символа');
-                return;
-            }
-
             const newUser = {
-                id: generateId(),
+                id: generateUserId(),
                 username: username,
                 password: password,
                 balance: 0,
@@ -366,7 +370,8 @@
                     type: 'system',
                     amount: 0,
                     description: 'Аккаунт создан',
-                    date: new Date().toISOString()
+                    date: new Date().toISOString(),
+                    device: getDeviceInfo()
                 }],
                 createdAt: new Date().toISOString()
             };
@@ -374,7 +379,7 @@
             users.push(newUser);
             saveData();
 
-            alert('✅ Аккаунт успешно создан! Теперь вы можете войти.');
+            alert('✅ Аккаунт создан! Теперь войдите на всех устройствах с этими данными.');
             document.getElementById('username').value = '';
             document.getElementById('password').value = '';
         }
@@ -394,9 +399,22 @@
                 currentUser = user;
                 showMainInterface();
                 updateUI();
+                alert(`✅ Добро пожаловать, ${user.username}!`);
             } else {
                 alert('❌ Неверное имя пользователя или пароль');
             }
+        }
+
+        function generateUserId() {
+            return 'user_' + Date.now();
+        }
+
+        function generateAccountNumber() {
+            return Math.floor(3000 + Math.random() * 7000).toString();
+        }
+
+        function getDeviceInfo() {
+            return navigator.userAgent.substring(0, 50) + '...';
         }
 
         function logout() {
@@ -405,11 +423,6 @@
             document.getElementById('mainSection').style.display = 'none';
             document.getElementById('username').value = '';
             document.getElementById('password').value = '';
-            document.getElementById('codeDisplay').style.display = 'none';
-        }
-
-        function generateAccountNumber() {
-            return Math.floor(3000 + Math.random() * 7000).toString();
         }
 
         // ==================== ОСНОВНОЙ ИНТЕРФЕЙС ====================
@@ -433,17 +446,16 @@
         }
 
         function formatBalance(amount) {
-            return amount.toLocaleString('ru-RU', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            return amount.toLocaleString('ru-RU');
         }
 
         function updateTransactionsList() {
             const list = document.getElementById('transactionsList');
             list.innerHTML = '';
 
-            // Сортируем транзакции от новых к старым
             const sortedTransactions = [...currentUser.transactions].sort((a, b) => 
                 new Date(b.date) - new Date(a.date)
-            );
+            ).slice(0, 10); // Показываем последние 10 транзакций
 
             sortedTransactions.forEach(transaction => {
                 const transactionEl = document.createElement('div');
@@ -468,7 +480,7 @@
             });
         }
 
-        // ==================== ОПЕРАЦИИ С КОДАМИ ====================
+        // ==================== МЕЖ УСТРОЙСТВЕННЫЕ ОПЕРАЦИИ ====================
         function generatePaymentCode() {
             const amount = parseFloat(document.getElementById('amountInput').value);
 
@@ -477,20 +489,15 @@
                 return;
             }
 
-            if (amount > currentUser.balance) {
+            if (!currentUser.isAdmin && amount > currentUser.balance) {
                 alert('❌ Недостаточно средств');
                 return;
             }
 
-            // Списываем средства (кроме админа)
-            if (!currentUser.isAdmin) {
-                currentUser.balance -= amount;
-            }
-
             // Генерируем уникальный код
-            const code = "BANK-" + 
-                Math.random().toString(36).substring(2, 6).toUpperCase() + "-" + 
-                Date.now().toString(36).substring(4, 8).toUpperCase();
+            const code = "MPAY-" + 
+                Date.now().toString(36).toUpperCase() + "-" +
+                Math.random().toString(36).substring(2, 6).toUpperCase();
 
             // Сохраняем код
             const codeData = {
@@ -499,19 +506,26 @@
                 createdBy: currentUser.username,
                 createdById: currentUser.id,
                 createdAt: new Date().toISOString(),
-                used: false
+                used: false,
+                device: getDeviceInfo()
             };
 
             paymentCodes.push(codeData);
             saveData();
 
-            // Добавляем транзакцию
-            currentUser.transactions.unshift({
-                type: 'sent',
-                amount: currentUser.isAdmin ? 0 : -amount,
-                description: `Создан код оплаты: ${code}`,
-                date: new Date().toISOString()
-            });
+            // Списание средств (кроме админа)
+            if (!currentUser.isAdmin) {
+                currentUser.balance -= amount;
+                
+                // Добавляем транзакцию
+                currentUser.transactions.unshift({
+                    type: 'sent',
+                    amount: -amount,
+                    description: `Создан код: ${code}`,
+                    date: new Date().toISOString(),
+                    device: getDeviceInfo()
+                });
+            }
 
             // Показываем код
             document.getElementById('codeText').textContent = code;
@@ -524,18 +538,23 @@
             });
 
             updateUI();
-            alert(`✅ Код создан!\nСумма: ${amount} ₮\nКод скопирован в буфер обмена`);
+            saveData();
+            
+            alert(`✅ Код создан!\n💰 Сумма: ${amount} ₮\n📱 Код скопирован\n⚠️ Действует 5 минут`);
         }
 
         function usePaymentCode() {
             const code = prompt("Введите код оплаты:");
             if (!code) return;
 
+            // Очищаем старые коды перед поиском
+            cleanupOldCodes();
+
             // Ищем код
             const codeData = paymentCodes.find(c => c.code === code && !c.used);
 
             if (!codeData) {
-                alert("❌ Код не найден или уже использован!");
+                alert("❌ Код не найден!\n\nВозможные причины:\n• Код уже использован\n• Прошло более 5 минут\n• Опечатка в коде");
                 return;
             }
 
@@ -548,6 +567,7 @@
             codeData.used = true;
             codeData.usedBy = currentUser.username;
             codeData.usedAt = new Date().toISOString();
+            codeData.usedDevice = getDeviceInfo();
 
             // Зачисляем средства
             currentUser.balance += codeData.amount;
@@ -557,7 +577,8 @@
                 type: 'received',
                 amount: codeData.amount,
                 description: `Получен перевод (код: ${code}) от ${codeData.createdBy}`,
-                date: new Date().toISOString()
+                date: new Date().toISOString(),
+                device: getDeviceInfo()
             });
 
             saveData();
@@ -567,32 +588,53 @@
             alert(`✅ Успешно получено ${codeData.amount} ₮ от ${codeData.createdBy}!`);
         }
 
+        // ==================== СИНХРОНИЗАЦИЯ ====================
+        function forceSync() {
+            // Перезагружаем данные из localStorage
+            users = JSON.parse(localStorage.getItem('muzaffar_users')) || [];
+            paymentCodes = JSON.parse(localStorage.getItem('muzaffar_payment_codes')) || [];
+            
+            if (currentUser) {
+                // Обновляем текущего пользователя
+                const updatedUser = users.find(u => u.id === currentUser.id);
+                if (updatedUser) {
+                    currentUser = updatedUser;
+                    updateUI();
+                    alert('✅ Данные синхронизированы!');
+                }
+            }
+        }
+
+        function showSyncHelp() {
+            alert(`📖 ИНСТРУКЦИЯ ПО СИНХРОНИЗАЦИИ:
+
+1️⃣ НА УСТРОЙСТВЕ 1:
+• Войдите в аккаунт (например, user/user123)
+• Создайте код оплаты
+• Запомните код
+
+2️⃣ НА УСТРОЙСТВЕ 2:
+• Войдите в ТОТ ЖЕ АККАУНТ (user/user123)
+• Используйте код
+
+3️⃣ ЕСЛИ БАЛАНС НЕ СОВПАДАЕТ:
+• Нажмите "Принудительная синхронизация"
+• Или обновите страницу (F5)
+
+⚠️ ВАЖНО: Используйте одинаковые логины/пароли на всех устройствах!`);
+        }
+
         // ==================== ЗАГРУЗКА СИСТЕМЫ ====================
         document.addEventListener('DOMContentLoaded', function() {
             initializeSystem();
-            
-            // Проверяем, не авторизован ли пользователь
-            const savedUser = localStorage.getItem('muzaffar_current_user');
-            if (savedUser) {
-                const userData = JSON.parse(savedUser);
-                const user = users.find(u => u.id === userData.id);
-                if (user) {
-                    currentUser = user;
-                    showMainInterface();
-                    updateUI();
-                }
-            }
         });
 
-        // Сохраняем текущего пользователя при закрытии
-        window.addEventListener('beforeunload', function() {
+        // Автосинхронизация каждые 30 секунд
+        setInterval(() => {
             if (currentUser) {
-                localStorage.setItem('muzaffar_current_user', JSON.stringify({
-                    id: currentUser.id,
-                    username: currentUser.username
-                }));
+                forceSync();
             }
-        });
+        }, 30000);
     </script>
 </body>
 </html>
