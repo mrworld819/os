@@ -1,805 +1,916 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Muzaffar OS</title>
-<style>
-  body { margin:0; font-family:sans-serif; background: linear-gradient(135deg,#74ebd5,#ACB6E5); overflow:hidden; }
-  #desktop { position:relative; width:100%; height:100vh; overflow:hidden; }
-  .icon { position:absolute; width:80px; text-align:center; cursor:pointer; color:#fff; font-size:12px; transition: transform 0.2s; }
-  .icon:hover { transform: scale(1.1); }
-  .icon img { width:60px; height:60px; margin-bottom:5px; }
-  .app { display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:#f0f0f0; z-index:1000; overflow:auto; transition:all 0.3s ease; }
-  .app-header { background:#1c92d2; color:#fff; padding:10px; font-size:18px; position:sticky; top:0; display:flex; justify-content:space-between; align-items:center; }
-  .close-btn { background:#fff; color:#1c92d2; border:none; font-size:18px; width:30px; height:30px; border-radius:50%; cursor:pointer; }
-  .app-body { padding:10px; }
-  input[type=text], input[type=url], input[type=number], input[type=password] { padding:8px; width:100%; margin:5px 0; border:1px solid #ccc; border-radius:4px; }
-  button { padding:8px 15px; margin:3px; cursor:pointer; border:none; border-radius:5px; background:#1c92d2; color:#fff; }
-  
-  /* Стили для настроек */
-  .setting-section { background:#fff; margin:10px 0; padding:15px; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
-  .setting-title { font-weight:bold; margin-bottom:10px; color:#1c92d2; }
-  .setting-item { margin:10px 0; }
-  .url-input-group { display:flex; gap:10px; margin:10px 0; }
-  .url-input-group input { flex:1; }
-  
-  /* Стили для iframe */
-  .app-iframe { width:100%; height:90vh; border:none; }
-  
-  /* Стили для создания приложений */
-  .create-app-form { background:#f8f9fa; padding:15px; border-radius:8px; margin:10px 0; }
-  .form-group { margin:10px 0; }
-  .form-group label { display:block; margin-bottom:5px; font-weight:bold; }
-  .app-list { margin-top:20px; }
-  .app-item { display:flex; justify-content:space-between; align-items:center; padding:10px; background:#fff; margin:5px 0; border-radius:5px; border:1px solid #ddd; }
-  .delete-btn { background:#ff6b6b; color:white; border:none; padding:5px 10px; border-radius:3px; cursor:pointer; }
-  
-  /* Стили для Muzaffar Pay */
-  .pay-card { background:linear-gradient(135deg,#1c92d2,#f2fcfe); color:#fff; padding:20px; border-radius:15px; box-shadow:0 4px 10px rgba(0,0,0,0.3); width:90%; margin:0 auto 20px; }
-  .admin-badge { background:gold; color:black; padding:3px 8px; border-radius:10px; font-size:12px; font-weight:bold; margin-left:10px; }
-  .code-status { font-size:12px; margin-top:5px; }
-  .used { color:#ff6b6b; }
-  .active { color:#4CAF50; }
-  .transaction-item { 
-    padding:10px; 
-    margin:5px 0; 
-    background:#f9f9f9; 
-    border-radius:5px; 
-    border-left:4px solid #1c92d2; 
-  }
-  .transaction-received { border-left-color: #4CAF50; }
-  .transaction-sent { border-left-color: #ff9800; }
-  .login-form { background:#fff; padding:15px; border-radius:8px; margin:10px 0; }
-  .security-note { background:#fff3cd; border:1px solid #ffeaa7; padding:10px; border-radius:5px; margin:10px 0; font-size:12px; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Muzaffar Pay - Банковская система</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1c92d2, #7db9e8);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .card {
+            background: linear-gradient(135deg, #1c92d2, #7db9e8);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .balance {
+            font-size: 36px;
+            font-weight: bold;
+            text-align: center;
+            margin: 15px 0;
+        }
+
+        .user-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .admin-badge {
+            background: gold;
+            color: black;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #1c92d2;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #1c92d2;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #167bb0;
+        }
+
+        .btn-success {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #45a049;
+        }
+
+        .btn-warning {
+            background: #ff9800;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #e68900;
+        }
+
+        .btn-danger {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #da190b;
+        }
+
+        .btn-secondary {
+            background: #666;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #555;
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .code-display {
+            background: #f8f9fa;
+            border: 2px dashed #1c92d2;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .code-text {
+            font-family: 'Courier New', monospace;
+            font-size: 18px;
+            font-weight: bold;
+            color: #1c92d2;
+            margin: 10px 0;
+        }
+
+        .code-info {
+            font-size: 12px;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .history {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .transaction {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border-left: 4px solid #1c92d2;
+        }
+
+        .transaction.received {
+            border-left-color: #4CAF50;
+        }
+
+        .transaction.sent {
+            border-left-color: #ff9800;
+        }
+
+        .transaction.admin {
+            border-left-color: #ffd700;
+        }
+
+        .transaction-header {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .transaction-amount {
+            font-weight: bold;
+        }
+
+        .transaction.received .transaction-amount {
+            color: #4CAF50;
+        }
+
+        .transaction.sent .transaction-amount {
+            color: #ff9800;
+        }
+
+        .login-section {
+            display: block;
+        }
+
+        .main-section {
+            display: none;
+        }
+
+        .admin-panel {
+            background: #fff3cd;
+            border: 2px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .admin-panel h3 {
+            color: #856404;
+            margin-bottom: 15px;
+        }
+
+        .security-note {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 12px;
+            color: #155724;
+        }
+
+        .new-badge {
+            background: #ff6b6b;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 10px;
+            margin-left: 5px;
+        }
+
+        .sync-notice {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 12px;
+            color: #0c5460;
+        }
+    </style>
 </head>
 <body>
-<div id="desktop">
-  <!-- Приложения будут добавляться сюда динамически -->
-</div>
-
-<!-- ------------------------ Настройки ------------------------ -->
-<div id="settingsApp" class="app">
-  <div class="app-header">⚙️ Настройки <button class="close-btn" onclick="closeApp('settingsApp')">×</button></div>
-  <div class="app-body">
-    
-    <div class="setting-section">
-      <div class="setting-title">📱 Управление приложениями</div>
-      
-      <div class="create-app-form">
-        <h3>Создать новое приложение</h3>
-        <div class="form-group">
-          <label>Название приложения:</label>
-          <input type="text" id="appName" placeholder="Например: YouTube">
+    <div class="container">
+        <div class="header">
+            <h1>💳 Muzaffar Pay</h1>
+            <p>Безопасная банковская система</p>
         </div>
-        <div class="form-group">
-          <label>URL приложения:</label>
-          <input type="url" id="appUrl" placeholder="https://example.com">
+
+        <div class="content">
+            <!-- Форма входа -->
+            <div id="loginSection" class="login-section">
+                <div class="form-group">
+                    <input type="text" id="username" placeholder="Имя пользователя" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="password" placeholder="Пароль" required>
+                </div>
+                <button class="btn-primary" onclick="login()">Войти</button>
+                <button class="btn-success" onclick="register()" style="margin-top: 10px;">Зарегистрироваться</button>
+                
+                <div class="sync-notice">
+                    🔄 <strong>Внимание:</strong> Для работы между устройствами используйте одинаковые браузеры или экспортируйте данные
+                </div>
+
+                <div class="security-note">
+                    🔒 <strong>Безопасность:</strong> Пароли защищены шифрованием
+                </div>
+
+                <div style="margin-top: 20px; padding: 15px; background: #e7f3ff; border-radius: 10px;">
+                    <h4 style="margin-bottom: 10px;">Тестовые аккаунты:</h4>
+                    <p><strong>Админ:</strong> BankAdmin / bank_admin_secure_2024</p>
+                    <p><strong>Демо:</strong> demo / user_default_pass</p>
+                </div>
+
+                <!-- Экспорт/Импорт данных -->
+                <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 10px;">
+                    <h4 style="margin-bottom: 10px;">🔄 Синхронизация между устройствами</h4>
+                    <button class="btn-warning" onclick="exportData()" style="margin-bottom: 10px;">Экспорт данных</button>
+                    <button class="btn-success" onclick="importData()">Импорт данных</button>
+                    <textarea id="importExportData" placeholder="Вставьте данные для импорта..." style="width: 100%; height: 60px; margin-top: 10px; padding: 10px; border-radius: 5px; border: 1px solid #ddd; display: none;"></textarea>
+                </div>
+            </div>
+
+            <!-- Основной интерфейс -->
+            <div id="mainSection" class="main-section">
+                <!-- Карта баланса -->
+                <div class="card">
+                    <div class="user-info">
+                        <span id="userDisplayName">Пользователь</span>
+                        <span id="adminBadge" class="admin-badge" style="display: none;">АДМИН</span>
+                    </div>
+                    <div class="balance" id="balanceDisplay">0 ₮</div>
+                    <div class="user-info">
+                        <span>Muzaffar Pay</span>
+                        <span id="accountNumber">•••• 1234</span>
+                    </div>
+                </div>
+
+                <!-- Форма операций -->
+                <div class="form-group">
+                    <input type="number" id="amountInput" placeholder="Сумма перевода" min="1">
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-primary" onclick="generatePaymentCode()">Создать код</button>
+                    <button class="btn-success" onclick="usePaymentCode()">Использовать код</button>
+                </div>
+
+                <!-- Отображение кода -->
+                <div id="codeDisplay" class="code-display">
+                    <div style="font-weight: bold; margin-bottom: 10px;">💰 Код оплаты</div>
+                    <div class="code-text" id="codeText">BANK-XXXX-XXXX</div>
+                    <div class="code-info">
+                        ⚠️ Код можно использовать только один раз<br>
+                        💵 Сумма: <span id="codeAmount">0</span> ₮<br>
+                        🕒 Действителен: 24 часа
+                    </div>
+                </div>
+
+                <!-- Кнопки администратора -->
+                <div id="adminButtonGroup" style="display: none;">
+                    <button class="btn-warning" onclick="toggleAdminPanel()">Панель администратора</button>
+                </div>
+
+                <!-- Панель администратора -->
+                <div id="adminPanel" class="admin-panel">
+                    <h3>🔧 Панель администратора</h3>
+                    <div class="button-group">
+                        <button class="btn-success" onclick="addFundsToAll()">➕ 1000 ₮ всем</button>
+                        <button class="btn-danger" onclick="resetAllBalances()">🔄 Обнулить счета</button>
+                    </div>
+                    <button class="btn-secondary" onclick="viewAllUsers()">👥 Все пользователи</button>
+                    <button class="btn-primary" onclick="syncAllDevices()" style="margin-top: 10px;">🔄 Синхронизировать устройства</button>
+                    
+                    <div id="usersList" style="margin-top: 15px;"></div>
+                </div>
+
+                <!-- История операций -->
+                <div class="history">
+                    <h3 style="margin-bottom: 15px;">📊 История операций</h3>
+                    <div id="transactionsList">
+                        <!-- Транзакции будут здесь -->
+                    </div>
+                </div>
+
+                <!-- Кнопка выхода -->
+                <button class="btn-secondary" onclick="logout()" style="margin-top: 20px;">Выйти</button>
+            </div>
         </div>
-        <div class="form-group">
-          <label>Иконка (URL):</label>
-          <input type="url" id="appIcon" placeholder="https://img.icons8.com/fluency/96/name.png">
-          <small>Можно найти иконки на <a href="https://icons8.com" target="_blank">icons8.com</a></small>
-        </div>
-        <button onclick="createNewApp()">➕ Создать приложение</button>
-      </div>
-      
-      <div class="app-list">
-        <h3>Мои приложения</h3>
-        <div id="appsList">
-          <!-- Список приложений будет здесь -->
-        </div>
-      </div>
     </div>
 
-    <div class="setting-section">
-      <div class="setting-title">🎨 Внешний вид</div>
-      <div class="setting-item">
-        <label>Обои:</label>
-        <select id="wallpaperSelect">
-          <option value="gradient">Градиент</option>
-          <option value="blue">Синий</option>
-          <option value="nature">Природа</option>
-          <option value="space">Космос</option>
-          <option value="dark">Темный</option>
-        </select>
-      </div>
-    </div>
-    
-    <div class="setting-section">
-      <div class="setting-title">⚡ Быстрые действия</div>
-      <button onclick="addSampleApps()">➕ Добавить примеры приложений</button>
-      <button onclick="clearAllApps()" style="background:#ff6b6b;">🗑️ Удалить все приложения</button>
-    </div>
-  </div>
-</div>
+    <script>
+        // ==================== СИСТЕМА БАНКА ====================
+        let currentUser = null;
+        let users = JSON.parse(localStorage.getItem('muzaffar_pay_users')) || [];
+        let paymentCodes = JSON.parse(localStorage.getItem('muzaffar_payment_codes')) || [];
+        let currentDeviceId = localStorage.getItem('muzaffar_device_id') || generateDeviceId();
 
-<!-- ------------------------ Muzaffar Pay App ------------------------ -->
-<div id="payApp" class="app">
-  <div class="app-header">
-    💳 Muzaffar Pay
-    <button class="close-btn" onclick="closeApp('payApp')">×</button>
-  </div>
-  <div class="app-body" style="text-align:center;">
-    
-    <!-- Форма входа -->
-    <div id="loginSection" class="login-form">
-      <h3>Вход в Muzaffar Pay</h3>
-      <input type="text" id="username" placeholder="Имя пользователя">
-      <input type="password" id="password" placeholder="Пароль">
-      <button onclick="login()">Войти</button>
-      <button onclick="register()" style="background:#4CAF50;">Зарегистрироваться</button>
-      
-      <div class="security-note">
-        🔒 <strong>Безопасность:</strong> Пароли защищены и не отображаются в коде
-      </div>
-    </div>
-    
-    <!-- Основной интерфейс -->
-    <div id="mainPaySection" style="display:none;">
-      <div class="pay-card">
-        <h2>Muzaffar Pay <span id="adminBadge" class="admin-badge" style="display:none;">ADMIN</span></h2>
-        <p id="balance" style="font-size:24px;font-weight:bold;">0 ₮</p>
-        <p id="userInfo" style="font-size:14px;"></p>
-      </div>
-
-      <div>
-        <input id="amount" type="number" placeholder="Сумма перевода" min="1">
-        <br>
-        <button onclick="generateCode()">Создать код оплаты</button>
-        <button onclick="applyCode()">Использовать код</button>
-        <button id="adminBtn" onclick="toggleAdminPanel()" style="background:#ff9800; display:none;">Панель администратора</button>
-        <button onclick="logout()" style="background:#666;">Выйти</button>
-      </div>
-
-      <div id="transferCode" style="margin-top:15px; padding:10px; background:#f8f9fa; border-radius:5px;"></div>
-
-      <!-- Панель администратора -->
-      <div id="adminPanel" style="display:none; margin-top:20px; padding:15px; background:#fff; border-radius:8px;">
-        <h3>🔧 Панель администратора</h3>
-        <button onclick="addFundsToAll()" style="background:#4CAF50;">➕ Начислить всем по 1000 ₮</button>
-        <button onclick="resetAllBalances()" style="background:#ff6b6b;">🔄 Обнулить все счета</button>
-        <button onclick="viewAllUsers()" style="background:#9c27b0;">👥 Просмотр всех пользователей</button>
-        
-        <div id="allUsersList" style="margin-top:15px; max-height:200px; overflow-y:auto;"></div>
-      </div>
-
-      <hr style="margin:20px 0;border:none;height:1px;background:#ddd;">
-
-      <h3>История операций</h3>
-      <ul id="history" style="list-style:none;padding:0;max-height:200px;overflow-y:auto;"></ul>
-    </div>
-  </div>
-</div>
-
-<script>
-  // ------------------------ Глобальные переменные ------------------------
-  let userApps = JSON.parse(localStorage.getItem('muzaffar_user_apps') || '[]');
-  let nextPosition = { x: 40, y: 40 };
-  const GRID_SIZE = 100;
-  
-  // ------------------------ Muzaffar Pay улучшенный ------------------------
-  let currentUser = null;
-  let users = JSON.parse(localStorage.getItem('muzaffar_pay_users') || '[]');
-  let paymentCodes = JSON.parse(localStorage.getItem('muzaffar_payment_codes') || '[]');
-  
-  // Безопасная инициализация системы
-  function initializeBankSystem() {
-    // Создаем хеши для паролей вместо хранения в открытом виде
-    const adminPasswordHash = generateHash('bank_admin_secure_2024');
-    const userPasswordHash = generateHash('user_default_pass');
-    
-    // Инициализация админа, если его нет
-    if (!users.find(u => u.username === 'BankAdmin')) {
-      users.push({
-        username: 'BankAdmin',
-        passwordHash: adminPasswordHash,
-        balance: 9999999,
-        isAdmin: true,
-        transactions: ['Система: Админ аккаунт создан'],
-        createdAt: new Date().toISOString()
-      });
-    }
-    
-    // Инициализация тестового пользователя
-    if (!users.find(u => u.username === 'demo')) {
-      users.push({
-        username: 'demo',
-        passwordHash: userPasswordHash,
-        balance: 1000,
-        isAdmin: false,
-        transactions: ['Система: Демо аккаунт создан'],
-        createdAt: new Date().toISOString()
-      });
-    }
-    
-    localStorage.setItem('muzaffar_pay_users', JSON.stringify(users));
-  }
-
-  // Простая функция хеширования (в реальном приложении используйте bcrypt)
-  function generateHash(password) {
-    let hash = 0;
-    for (let i = 0; i < password.length; i++) {
-      const char = password.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash;
-    }
-    return hash.toString();
-  }
-
-  function verifyPassword(inputPassword, storedHash) {
-    return generateHash(inputPassword) === storedHash;
-  }
-
-  // ------------------------ Инициализация ------------------------
-  document.addEventListener('DOMContentLoaded', function() {
-    initializeBankSystem();
-    loadUserApps();
-    updateAppsList();
-    checkAutoLogin();
-  });
-
-  // ------------------------ Управление приложениями ------------------------
-  function loadUserApps() {
-    const desktop = document.getElementById('desktop');
-    
-    // Очищаем десктоп (кроме настроек и Muzaffar Pay)
-    const existingIcons = desktop.querySelectorAll('.icon:not(#settingsIcon):not(#payIcon)');
-    existingIcons.forEach(icon => icon.remove());
-    
-    // Добавляем приложения пользователя
-    userApps.forEach(app => {
-      createAppIcon(app);
-    });
-    
-    // Добавляем фиксированные приложения (Настройки и Muzaffar Pay)
-    createFixedApps();
-  }
-
-  function createAppIcon(app) {
-    const desktop = document.getElementById('desktop');
-    const icon = document.createElement('div');
-    icon.className = 'icon';
-    icon.style.left = app.position.x + 'px';
-    icon.style.top = app.position.y + 'px';
-    icon.setAttribute('data-app-id', app.id);
-    
-    icon.innerHTML = `
-      <img src="${app.icon}" alt="${app.name}">
-      <div>${app.name}</div>
-    `;
-    
-    icon.onclick = () => openCustomApp(app);
-    desktop.appendChild(icon);
-    
-    // Создаем iframe для приложения
-    createAppIframe(app);
-  }
-
-  function createAppIframe(app) {
-    const iframe = document.createElement('iframe');
-    iframe.id = `appFrame_${app.id}`;
-    iframe.className = 'app-iframe';
-    iframe.src = app.url;
-    
-    const appContainer = document.createElement('div');
-    appContainer.id = `app_${app.id}`;
-    appContainer.className = 'app';
-    appContainer.innerHTML = `
-      <div class="app-header">
-        ${app.name}
-        <button class="close-btn" onclick="closeApp('app_${app.id}')">×</button>
-      </div>
-      <div class="app-body"></div>
-    `;
-    
-    appContainer.querySelector('.app-body').appendChild(iframe);
-    document.body.appendChild(appContainer);
-  }
-
-  function createFixedApps() {
-    const desktop = document.getElementById('desktop');
-    
-    // Настройки
-    const settingsIcon = document.createElement('div');
-    settingsIcon.className = 'icon';
-    settingsIcon.style.left = '40px';
-    settingsIcon.style.top = '40px';
-    settingsIcon.innerHTML = `
-      <img src="https://img.icons8.com/fluency/96/settings.png" alt="Настройки">
-      <div>Настройки</div>
-    `;
-    settingsIcon.onclick = () => openApp('settingsApp');
-    desktop.appendChild(settingsIcon);
-    
-    // Muzaffar Pay
-    const payIcon = document.createElement('div');
-    payIcon.className = 'icon';
-    payIcon.style.left = '140px';
-    payIcon.style.top = '40px';
-    payIcon.innerHTML = `
-      <img src="https://img.icons8.com/fluency/96/bank-cards.png" alt="Muzaffar Pay">
-      <div>Muzaffar Pay</div>
-    `;
-    payIcon.onclick = () => openApp('payApp');
-    desktop.appendChild(payIcon);
-  }
-
-  function createNewApp() {
-    const name = document.getElementById('appName').value.trim();
-    const url = document.getElementById('appUrl').value.trim();
-    const icon = document.getElementById('appIcon').value.trim() || 'https://img.icons8.com/fluency/96/application.png';
-    
-    if (!name || !url) {
-      alert('Пожалуйста, заполните название и URL приложения');
-      return;
-    }
-    
-    // Генерируем новую позицию
-    const position = getNextPosition();
-    
-    const newApp = {
-      id: Date.now().toString(),
-      name: name,
-      url: url,
-      icon: icon,
-      position: position
-    };
-    
-    userApps.push(newApp);
-    saveUserApps();
-    createAppIcon(newApp);
-    updateAppsList();
-    
-    // Очищаем форму
-    document.getElementById('appName').value = '';
-    document.getElementById('appUrl').value = '';
-    document.getElementById('appIcon').value = '';
-    
-    alert(`Приложение "${name}" создано!`);
-  }
-
-  function getNextPosition() {
-    const positions = userApps.map(app => app.position);
-    let x = 40, y = 140;
-    let foundPosition = false;
-    
-    while (!foundPosition) {
-      const positionExists = positions.some(pos => pos.x === x && pos.y === y);
-      if (!positionExists) {
-        foundPosition = true;
-      } else {
-        x += GRID_SIZE;
-        if (x > 500) {
-          x = 40;
-          y += GRID_SIZE;
+        // Генерация ID устройства
+        function generateDeviceId() {
+            const id = 'device_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+            localStorage.setItem('muzaffar_device_id', id);
+            return id;
         }
-      }
-    }
-    
-    return { x: x, y: y };
-  }
 
-  function deleteApp(appId) {
-    if (confirm('Вы уверены, что хотите удалить это приложение?')) {
-      userApps = userApps.filter(app => app.id !== appId);
-      saveUserApps();
-      
-      // Удаляем иконку
-      const icon = document.querySelector(`[data-app-id="${appId}"]`);
-      if (icon) icon.remove();
-      
-      // Удаляем iframe
-      const appContainer = document.getElementById(`app_${appId}`);
-      if (appContainer) appContainer.remove();
-      
-      updateAppsList();
-    }
-  }
-
-  function updateAppsList() {
-    const appsList = document.getElementById('appsList');
-    appsList.innerHTML = '';
-    
-    if (userApps.length === 0) {
-      appsList.innerHTML = '<p>У вас пока нет приложений</p>';
-      return;
-    }
-    
-    userApps.forEach(app => {
-      const appItem = document.createElement('div');
-      appItem.className = 'app-item';
-      appItem.innerHTML = `
-        <div>
-          <strong>${app.name}</strong><br>
-          <small>${app.url}</small>
-        </div>
-        <button class="delete-btn" onclick="deleteApp('${app.id}')">Удалить</button>
-      `;
-      appsList.appendChild(appItem);
-    });
-  }
-
-  function saveUserApps() {
-    localStorage.setItem('muzaffar_user_apps', JSON.stringify(userApps));
-  }
-
-  // ------------------------ Управление окнами ------------------------
-  function openApp(id) {
-    document.getElementById(id).style.display = 'block';
-  }
-
-  function openCustomApp(app) {
-    document.getElementById(`app_${app.id}`).style.display = 'block';
-  }
-
-  function closeApp(id) {
-    document.getElementById(id).style.display = 'none';
-  }
-
-  // ------------------------ Вспомогательные функции ------------------------
-  function addSampleApps() {
-    const sampleApps = [
-      {
-        name: 'YouTube',
-        url: 'https://www.youtube.com',
-        icon: 'https://img.icons8.com/color/96/youtube-play.png'
-      },
-      {
-        name: 'Google',
-        url: 'https://www.google.com',
-        icon: 'https://img.icons8.com/color/96/google-logo.png'
-      },
-      {
-        name: 'Gmail',
-        url: 'https://mail.google.com',
-        icon: 'https://img.icons8.com/color/96/gmail.png'
-      }
-    ];
-    
-    sampleApps.forEach(appData => {
-      const position = getNextPosition();
-      const newApp = {
-        id: Date.now().toString() + Math.random(),
-        name: appData.name,
-        url: appData.url,
-        icon: appData.icon,
-        position: position
-      };
-      userApps.push(newApp);
-      createAppIcon(newApp);
-    });
-    
-    saveUserApps();
-    updateAppsList();
-    alert('Примеры приложений добавлены!');
-  }
-
-  function clearAllApps() {
-    if (confirm('Вы уверены, что хотите удалить ВСЕ приложения?')) {
-      userApps = [];
-      saveUserApps();
-      loadUserApps();
-      updateAppsList();
-      alert('Все приложения удалены!');
-    }
-  }
-
-  // ------------------------ Muzaffar Pay улучшенный ------------------------
-  function checkAutoLogin() {
-    const savedUser = localStorage.getItem('muzaffar_current_user');
-    if (savedUser) {
-      const userData = JSON.parse(savedUser);
-      loginUser(userData.username, userData.password, true);
-    }
-  }
-
-  function login() {
-    const username = document.getElementById('username').value.trim();
-    const password = document.getElementById('password').value;
-    
-    if (!username || !password) {
-      alert('Введите имя пользователя и пароль');
-      return;
-    }
-    
-    loginUser(username, password, false);
-  }
-
-  function loginUser(username, password, isAutoLogin) {
-    const user = users.find(u => u.username === username);
-    
-    if (user && verifyPassword(password, user.passwordHash)) {
-      currentUser = user;
-      
-      if (!isAutoLogin) {
-        // Сохраняем только для автоматического входа (в реальном приложении используйте токены)
-        localStorage.setItem('muzaffar_current_user', JSON.stringify({
-          username: user.username,
-          password: password // Временное решение для демо
-        }));
-      }
-      
-      showPayInterface();
-      updatePayUI();
-      
-      if (!isAutoLogin) {
-        alert(`Добро пожаловать, ${user.username}!`);
-      }
-    } else {
-      if (!isAutoLogin) {
-        alert('Неверное имя пользователя или пароль');
-      }
-    }
-  }
-
-  function register() {
-    const username = document.getElementById('username').value.trim();
-    const password = document.getElementById('password').value;
-    
-    if (!username || !password) {
-      alert('Введите имя пользователя и пароль');
-      return;
-    }
-    
-    if (users.find(u => u.username === username)) {
-      alert('Пользователь с таким именем уже существует');
-      return;
-    }
-    
-    if (password.length < 4) {
-      alert('Пароль должен содержать минимум 4 символа');
-      return;
-    }
-    
-    const newUser = {
-      username: username,
-      passwordHash: generateHash(password),
-      balance: 0,
-      isAdmin: false,
-      transactions: ['Система: Аккаунт создан'],
-      createdAt: new Date().toISOString()
-    };
-    
-    users.push(newUser);
-    localStorage.setItem('muzaffar_pay_users', JSON.stringify(users));
-    
-    alert('Аккаунт успешно создан! Теперь вы можете войти.');
-    document.getElementById('username').value = '';
-    document.getElementById('password').value = '';
-  }
-
-  function logout() {
-    currentUser = null;
-    localStorage.removeItem('muzaffar_current_user');
-    document.getElementById('loginSection').style.display = 'block';
-    document.getElementById('mainPaySection').style.display = 'none';
-    document.getElementById('username').value = '';
-    document.getElementById('password').value = '';
-    document.getElementById('adminPanel').style.display = 'none';
-  }
-
-  function showPayInterface() {
-    document.getElementById('loginSection').style.display = 'none';
-    document.getElementById('mainPaySection').style.display = 'block';
-    
-    if (currentUser.isAdmin) {
-      document.getElementById('adminBadge').style.display = 'inline';
-      document.getElementById('adminBtn').style.display = 'inline-block';
-    } else {
-      document.getElementById('adminBadge').style.display = 'none';
-      document.getElementById('adminBtn').style.display = 'none';
-    }
-  }
-
-  function updatePayUI() {
-    if (!currentUser) return;
-    
-    document.getElementById('balance').textContent = formatBalance(currentUser.balance) + " ₮";
-    document.getElementById('userInfo').textContent = `Пользователь: ${currentUser.username}`;
-    
-    const list = document.getElementById('history');
-    list.innerHTML = currentUser.transactions.map((t, index) => 
-      `<li class="transaction-item ${t.includes('Получено') ? 'transaction-received' : t.includes('Отправлено') ? 'transaction-sent' : ''}">
-        ${t} ${index === 0 ? '🆕' : ''}
-      </li>`
-    ).reverse().join('');
-    
-    // Сохраняем обновленные данные пользователя
-    const userIndex = users.findIndex(u => u.username === currentUser.username);
-    if (userIndex !== -1) {
-      users[userIndex] = currentUser;
-      localStorage.setItem('muzaffar_pay_users', JSON.stringify(users));
-    }
-  }
-
-  function formatBalance(amount) {
-    return amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
-  }
-
-  function generateCode() {
-    if (!currentUser) return;
-    
-    const amount = parseFloat(document.getElementById('amount').value);
-    
-    if (!amount || amount <= 0) {
-      alert('Введите корректную сумму');
-      return;
-    }
-    
-    if (!currentUser.isAdmin && amount > currentUser.balance) {
-      alert('Недостаточно средств');
-      return;
-    }
-    
-    // Админ может создавать коды без списания средств
-    if (!currentUser.isAdmin) {
-      currentUser.balance -= amount;
-    }
-    
-    const code = "BANK-" + Math.random().toString(36).substring(2, 8).toUpperCase() + "-" + Math.random().toString(36).substring(2, 6).toUpperCase();
-    const codeData = {
-      code: code,
-      amount: amount,
-      createdBy: currentUser.username,
-      createdAt: new Date().toISOString(),
-      used: false,
-      usedBy: null,
-      usedAt: null
-    };
-    
-    paymentCodes.push(codeData);
-    localStorage.setItem('muzaffar_payment_codes', JSON.stringify(paymentCodes));
-    
-    document.getElementById('transferCode').innerHTML = `
-      <strong>💰 Код оплаты: ${code}</strong><br>
-      <span class="code-status active">💵 Сумма: ${amount} ₮</span><br>
-      <span class="code-status active">⏰ Создан: ${new Date().toLocaleTimeString()}</span><br>
-      <small>⚠️ Код можно использовать только один раз</small>
-    `;
-    
-    const transactionMessage = currentUser.isAdmin ? 
-      `Создан код оплаты ${amount} ₮ (${code}) [АДМИН]` :
-      `Создан код оплаты ${amount} ₮ (${code})`;
-    
-    currentUser.transactions.unshift(transactionMessage);
-    updatePayUI();
-  }
-
-  function applyCode() {
-    if (!currentUser) return;
-    
-    const code = prompt("Введите код оплаты:");
-    if (!code) return;
-    
-    const codeData = paymentCodes.find(c => c.code === code);
-    
-    if (!codeData) {
-      alert("Код не найден");
-      return;
-    }
-    
-    if (codeData.used) {
-      alert("Код уже использован");
-      return;
-    }
-    
-    if (codeData.createdBy === currentUser.username) {
-      alert("Нельзя использовать свой собственный код");
-      return;
-    }
-    
-    // Помечаем код как использованный
-    codeData.used = true;
-    codeData.usedBy = currentUser.username;
-    codeData.usedAt = new Date().toISOString();
-    localStorage.setItem('muzaffar_payment_codes', JSON.stringify(paymentCodes));
-    
-    // Зачисляем средства
-    currentUser.balance += codeData.amount;
-    currentUser.transactions.unshift(`Получено ${codeData.amount} ₮ (код: ${code})`);
-    
-    // Обновляем UI
-    updatePayUI();
-    document.getElementById('transferCode').innerHTML = `
-      <span style="color:#4CAF50;">✅ Перевод получен: ${codeData.amount} ₮</span><br>
-      <small>От: ${codeData.createdBy}</small>
-    `;
-    
-    alert(`Успешно получено ${codeData.amount} ₮!`);
-  }
-
-  function toggleAdminPanel() {
-    const panel = document.getElementById('adminPanel');
-    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-  }
-
-  function addFundsToAll() {
-    if (!currentUser || !currentUser.isAdmin) return;
-    
-    users.forEach(user => {
-      if (!user.isAdmin) {
-        user.balance += 1000;
-        user.transactions.unshift(`Админ: Начислено 1000 ₮`);
-      }
-    });
-    
-    localStorage.setItem('muzaffar_pay_users', JSON.stringify(users));
-    alert('Всем пользователям начислено по 1000 ₮!');
-    
-    // Обновляем текущего пользователя если он не админ
-    if (!currentUser.isAdmin) {
-      const updatedUser = users.find(u => u.username === currentUser.username);
-      if (updatedUser) {
-        currentUser = updatedUser;
-        updatePayUI();
-      }
-    }
-  }
-
-  function resetAllBalances() {
-    if (!currentUser || !currentUser.isAdmin) return;
-    
-    if (confirm('Вы уверены, что хотите обнулить все счета (кроме админа)?')) {
-      users.forEach(user => {
-        if (!user.isAdmin) {
-          user.balance = 0;
-          user.transactions.unshift(`Админ: Счет обнулен`);
+        // Инициализация системы
+        function initializeBankSystem() {
+            const adminPasswordHash = generateHash('bank_admin_secure_2024');
+            const demoPasswordHash = generateHash('user_default_pass');
+            
+            // Создаем админ аккаунт если не существует
+            if (!users.find(u => u.username === 'BankAdmin')) {
+                users.push({
+                    username: 'BankAdmin',
+                    passwordHash: adminPasswordHash,
+                    balance: 9999999,
+                    isAdmin: true,
+                    transactions: [
+                        {
+                            type: 'system',
+                            amount: 0,
+                            description: 'Админ аккаунт создан',
+                            date: new Date().toISOString(),
+                            isNew: false,
+                            deviceId: currentDeviceId
+                        }
+                    ],
+                    createdAt: new Date().toISOString(),
+                    accountNumber: '1001'
+                });
+            }
+            
+            // Создаем демо аккаунт если не существует
+            if (!users.find(u => u.username === 'demo')) {
+                users.push({
+                    username: 'demo',
+                    passwordHash: demoPasswordHash,
+                    balance: 1000,
+                    isAdmin: false,
+                    transactions: [
+                        {
+                            type: 'system',
+                            amount: 0,
+                            description: 'Демо аккаунт создан',
+                            date: new Date().toISOString(),
+                            isNew: false,
+                            deviceId: currentDeviceId
+                        }
+                    ],
+                    createdAt: new Date().toISOString(),
+                    accountNumber: '2001'
+                });
+            }
+            
+            // Очищаем просроченные коды
+            cleanupExpiredCodes();
+            
+            saveUsersData();
         }
-      });
-      
-      localStorage.setItem('muzaffar_pay_users', JSON.stringify(users));
-      alert('Все счета обнулены!');
-      
-      // Обновляем текущего пользователя если он не админ
-      if (!currentUser.isAdmin) {
-        const updatedUser = users.find(u => u.username === currentUser.username);
-        if (updatedUser) {
-          currentUser = updatedUser;
-          updatePayUI();
+
+        // Очистка просроченных кодов (24 часа)
+        function cleanupExpiredCodes() {
+            const now = new Date();
+            paymentCodes = paymentCodes.filter(code => {
+                const codeDate = new Date(code.createdAt);
+                const diffHours = (now - codeDate) / (1000 * 60 * 60);
+                return diffHours < 24 && !code.used;
+            });
         }
-      }
-    }
-  }
 
-  function viewAllUsers() {
-    if (!currentUser || !currentUser.isAdmin) return;
-    
-    const usersList = document.getElementById('allUsersList');
-    usersList.innerHTML = users.map(user => `
-      <div style="padding:8px; margin:5px 0; background:#f5f5f5; border-radius:5px;">
-        <strong>${user.username}</strong> ${user.isAdmin ? '👑 АДМИН' : ''}<br>
-        Баланс: ${user.balance} ₮<br>
-        <small>Транзакций: ${user.transactions.length}</small><br>
-        <small>Создан: ${new Date(user.createdAt).toLocaleDateString()}</small>
-      </div>
-    `).join('');
-  }
+        // Хеширование пароля
+        function generateHash(password) {
+            let hash = 0;
+            for (let i = 0; i < password.length; i++) {
+                const char = password.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            return hash.toString();
+        }
 
-  // ------------------------ Обои ------------------------
-  document.getElementById('wallpaperSelect').addEventListener('change', function() {
-    const wallpaper = this.value;
-    let gradient = 'linear-gradient(135deg,#74ebd5,#ACB6E5)';
-    
-    if (wallpaper === 'blue') {
-      gradient = 'linear-gradient(135deg,#1c92d2,#f2fcfe)';
-    } else if (wallpaper === 'nature') {
-      gradient = 'linear-gradient(135deg,#56ab2f,#a8e063)';
-    } else if (wallpaper === 'space') {
-      gradient = 'linear-gradient(135deg,#0f2027,#203a43,#2c5364)';
-    } else if (wallpaper === 'dark') {
-      gradient = 'linear-gradient(135deg,#2c3e50,#34495e)';
-    }
-    
-    document.body.style.background = gradient;
-    localStorage.setItem('muzaffar_wallpaper', wallpaper);
-  });
-  
-  // Загружаем сохраненные обои
-  const savedWallpaper = localStorage.getItem('muzaffar_wallpaper') || 'gradient';
-  document.getElementById('wallpaperSelect').value = savedWallpaper;
-  document.getElementById('wallpaperSelect').dispatchEvent(new Event('change'));
-</script>
+        function verifyPassword(inputPassword, storedHash) {
+            return generateHash(inputPassword) === storedHash;
+        }
+
+        // Сохранение данных
+        function saveUsersData() {
+            localStorage.setItem('muzaffar_pay_users', JSON.stringify(users));
+            localStorage.setItem('muzaffar_payment_codes', JSON.stringify(paymentCodes));
+            localStorage.setItem('muzaffar_last_sync', new Date().toISOString());
+        }
+
+        // ==================== ЭКСПОРТ/ИМПОРТ ДАННЫХ ====================
+        function exportData() {
+            const data = {
+                users: users,
+                paymentCodes: paymentCodes,
+                exportDate: new Date().toISOString(),
+                deviceId: currentDeviceId
+            };
+            
+            const dataString = JSON.stringify(data, null, 2);
+            const textarea = document.getElementById('importExportData');
+            textarea.style.display = 'block';
+            textarea.value = dataString;
+            textarea.select();
+            document.execCommand('copy');
+            alert('Данные скопированы в буфер обмена! Вставьте их на другом устройстве.');
+        }
+
+        function importData() {
+            const textarea = document.getElementById('importExportData');
+            const dataString = textarea.value.trim();
+            
+            if (!dataString) {
+                alert('Вставьте данные для импорта');
+                return;
+            }
+            
+            try {
+                const data = JSON.parse(dataString);
+                
+                if (data.users && data.paymentCodes) {
+                    users = data.users;
+                    paymentCodes = data.paymentCodes;
+                    saveUsersData();
+                    
+                    // Обновляем текущего пользователя если он был авторизован
+                    if (currentUser) {
+                        const updatedUser = users.find(u => u.username === currentUser.username);
+                        if (updatedUser) {
+                            currentUser = updatedUser;
+                            updateUI();
+                        }
+                    }
+                    
+                    alert('Данные успешно импортированы!');
+                    textarea.style.display = 'none';
+                    textarea.value = '';
+                    
+                    // Перезагружаем интерфейс
+                    if (currentUser) {
+                        showMainInterface();
+                        updateUI();
+                    }
+                } else {
+                    alert('Неверный формат данных');
+                }
+            } catch (e) {
+                alert('Ошибка при импорте данных: ' + e.message);
+            }
+        }
+
+        // ==================== АУТЕНТИФИКАЦИЯ ====================
+        function login() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+
+            if (!username || !password) {
+                alert('Введите имя пользователя и пароль');
+                return;
+            }
+
+            const user = users.find(u => u.username === username);
+            
+            if (user && verifyPassword(password, user.passwordHash)) {
+                currentUser = user;
+                showMainInterface();
+                updateUI();
+                alert(`Добро пожаловать, ${user.username}!`);
+            } else {
+                alert('Неверное имя пользователя или пароль');
+            }
+        }
+
+        function register() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+
+            if (!username || !password) {
+                alert('Введите имя пользователя и пароль');
+                return;
+            }
+
+            if (users.find(u => u.username === username)) {
+                alert('Пользователь с таким именем уже существует');
+                return;
+            }
+
+            if (password.length < 4) {
+                alert('Пароль должен содержать минимум 4 символа');
+                return;
+            }
+
+            const newUser = {
+                username: username,
+                passwordHash: generateHash(password),
+                balance: 0,
+                isAdmin: false,
+                transactions: [
+                    {
+                        type: 'system',
+                        amount: 0,
+                        description: 'Аккаунт создан',
+                        date: new Date().toISOString(),
+                        isNew: true,
+                        deviceId: currentDeviceId
+                    }
+                ],
+                createdAt: new Date().toISOString(),
+                accountNumber: generateAccountNumber()
+            };
+
+            users.push(newUser);
+            saveUsersData();
+
+            alert('Аккаунт успешно создан! Теперь вы можете войти.');
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+        }
+
+        function generateAccountNumber() {
+            return Math.floor(2000 + Math.random() * 8000).toString();
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('loginSection').style.display = 'block';
+            document.getElementById('mainSection').style.display = 'none';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('adminPanel').style.display = 'none';
+            document.getElementById('importExportData').style.display = 'none';
+        }
+
+        // ==================== ИНТЕРФЕЙС ====================
+        function showMainInterface() {
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('mainSection').style.display = 'block';
+            
+            if (currentUser.isAdmin) {
+                document.getElementById('adminBadge').style.display = 'inline';
+                document.getElementById('adminButtonGroup').style.display = 'block';
+            }
+        }
+
+        function updateUI() {
+            if (!currentUser) return;
+
+            document.getElementById('userDisplayName').textContent = currentUser.username;
+            document.getElementById('balanceDisplay').textContent = formatBalance(currentUser.balance) + ' ₮';
+            document.getElementById('accountNumber').textContent = '•••• ' + currentUser.accountNumber;
+
+            updateTransactionsList();
+        }
+
+        function formatBalance(amount) {
+            return amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+        }
+
+        function updateTransactionsList() {
+            const list = document.getElementById('transactionsList');
+            list.innerHTML = '';
+
+            currentUser.transactions.slice().reverse().forEach(transaction => {
+                const transactionEl = document.createElement('div');
+                transactionEl.className = `transaction ${transaction.type}`;
+                
+                let amountHtml = '';
+                if (transaction.amount > 0) {
+                    amountHtml = `<span class="transaction-amount">+${transaction.amount} ₮</span>`;
+                } else if (transaction.amount < 0) {
+                    amountHtml = `<span class="transaction-amount">${transaction.amount} ₮</span>`;
+                }
+
+                transactionEl.innerHTML = `
+                    <div class="transaction-header">
+                        <span>${transaction.description}</span>
+                        ${amountHtml}
+                        ${transaction.isNew ? '<span class="new-badge">NEW</span>' : ''}
+                    </div>
+                    <div style="font-size: 12px; color: #666;">
+                        ${new Date(transaction.date).toLocaleString()}
+                        ${transaction.deviceId && transaction.deviceId !== currentDeviceId ? '🌐' : ''}
+                    </div>
+                `;
+                
+                list.appendChild(transactionEl);
+            });
+
+            // Помечаем транзакции как просмотренные
+            currentUser.transactions.forEach(t => t.isNew = false);
+            saveUsersData();
+        }
+
+        // ==================== ОПЕРАЦИИ ====================
+        function generatePaymentCode() {
+            const amount = parseFloat(document.getElementById('amountInput').value);
+
+            if (!amount || amount <= 0) {
+                alert('Введите корректную сумму');
+                return;
+            }
+
+            if (!currentUser.isAdmin && amount > currentUser.balance) {
+                alert('Недостаточно средств');
+                return;
+            }
+
+            // Админ может создавать коды без списания
+            if (!currentUser.isAdmin) {
+                currentUser.balance -= amount;
+            }
+
+            // Генерируем уникальный код
+            const code = "BANK-" + 
+                Math.random().toString(36).substring(2, 6).toUpperCase() + "-" + 
+                Math.random().toString(36).substring(2, 6).toUpperCase() + "-" +
+                Date.now().toString(36).substring(4, 8).toUpperCase();
+
+            const codeData = {
+                code: code,
+                amount: amount,
+                createdBy: currentUser.username,
+                createdAt: new Date().toISOString(),
+                used: false,
+                usedBy: null,
+                deviceId: currentDeviceId,
+                codeId: 'code_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5)
+            };
+
+            paymentCodes.push(codeData);
+            saveUsersData();
+
+            // Показываем код
+            document.getElementById('codeText').textContent = code;
+            document.getElementById('codeAmount').textContent = amount;
+            document.getElementById('codeDisplay').style.display = 'block';
+
+            // Добавляем транзакцию
+            currentUser.transactions.unshift({
+                type: 'sent',
+                amount: currentUser.isAdmin ? 0 : -amount,
+                description: `Создан код оплаты: ${code}`,
+                date: new Date().toISOString(),
+                isNew: true,
+                deviceId: currentDeviceId
+            });
+
+            updateUI();
+            
+            // Автоматически копируем код в буфер
+            navigator.clipboard.writeText(code).then(() => {
+                console.log('Код скопирован в буфер');
+            });
+        }
+
+        function usePaymentCode() {
+            const code = prompt("Введите код оплаты:");
+            if (!code) return;
+
+            const codeData = paymentCodes.find(c => c.code === code);
+
+            if (!codeData) {
+                alert("Код не найден. Убедитесь, что данные синхронизированы между устройствами.");
+                return;
+            }
+
+            if (codeData.used) {
+                alert("Код уже использован");
+                return;
+            }
+
+            if (codeData.createdBy === currentUser.username) {
+                alert("Нельзя использовать свой собственный код");
+                return;
+            }
+
+            // Проверяем срок действия кода (24 часа)
+            const codeDate = new Date(codeData.createdAt);
+            const now = new Date();
+            const diffHours = (now - codeDate) / (1000 * 60 * 60);
+            
+            if (diffHours > 24) {
+                alert("Код просрочен (действителен 24 часа)");
+                return;
+            }
+
+            // Помечаем код как использованный
+            codeData.used = true;
+            codeData.usedBy = currentUser.username;
+            codeData.usedAt = new Date().toISOString();
+
+            // Зачисляем средства
+            currentUser.balance += codeData.amount;
+            
+            // Добавляем транзакцию
+            currentUser.transactions.unshift({
+                type: 'received',
+                amount: codeData.amount,
+                description: `Получен перевод (код: ${code}) от ${codeData.createdBy}`,
+                date: new Date().toISOString(),
+                isNew: true,
+                deviceId: currentDeviceId
+            });
+
+            saveUsersData();
+            updateUI();
+            
+            document.getElementById('codeDisplay').style.display = 'none';
+            alert(`Успешно получено ${codeData.amount} ₮ от ${codeData.createdBy}!`);
+        }
+
+        // ==================== АДМИН ПАНЕЛЬ ====================
+        function toggleAdminPanel() {
+            const panel = document.getElementById('adminPanel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function addFundsToAll() {
+            if (!currentUser || !currentUser.isAdmin) return;
+
+            users.forEach(user => {
+                if (!user.isAdmin) {
+                    user.balance += 1000;
+                    user.transactions.unshift({
+                        type: 'received',
+                        amount: 1000,
+                        description: 'Админ: Начислено 1000 ₮',
+                        date: new Date().toISOString(),
+                        isNew: true,
+                        deviceId: currentDeviceId
+                    });
+                }
+            });
+
+            saveUsersData();
+            alert('Всем пользователям начислено по 1000 ₮!');
+            
+            // Обновляем интерфейс если текущий пользователь не админ
+            if (!currentUser.isAdmin) {
+                const updatedUser = users.find(u => u.username === currentUser.username);
+                if (updatedUser) {
+                    currentUser = updatedUser;
+                    updateUI();
+                }
+            }
+        }
+
+        function resetAllBalances() {
+            if (!currentUser || !currentUser.isAdmin) return;
+
+            if (confirm('Вы уверены, что хотите обнулить все счета (кроме админа)?')) {
+                users.forEach(user => {
+                    if (!user.isAdmin) {
+                        user.balance = 0;
+                        user.transactions.unshift({
+                            type: 'system',
+                            amount: 0,
+                            description: 'Админ: Счет обнулен',
+                            date: new Date().toISOString(),
+                            isNew: true,
+                            deviceId: currentDeviceId
+                        });
+                    }
+                });
+
+                saveUsersData();
+                alert('Все счета обнулены!');
+                
+                if (!currentUser.isAdmin) {
+                    const updatedUser = users.find(u => u.username === currentUser.username);
+                    if (updatedUser) {
+                        currentUser = updatedUser;
+                        updateUI();
+                    }
+                }
+            }
+        }
+
+        function viewAllUsers() {
+            if (!currentUser || !currentUser.isAdmin) return;
+
+            const usersList = document.getElementById('usersList');
+            usersList.innerHTML = users.map(user => `
+                <div style="padding: 10px; margin: 5px 0; background: white; border-radius: 5px; border: 1px solid #ddd;">
+                    <strong>${user.username}</strong> ${user.isAdmin ? '👑' : ''}<br>
+                    Баланс: ${user.balance} ₮ | Счет: ${user.accountNumber}<br>
+                    <small>Транзакций: ${user.transactions.length} | Создан: ${new Date(user.createdAt).toLocaleDateString()}</small>
+                </div>
+            `).join('');
+        }
+
+        function syncAllDevices() {
+            exportData();
+        }
+
+        // ==================== ИНИЦИАЛИЗАЦИЯ ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeBankSystem();
+            
+            // Показываем уведомление о синхронизации
+            const lastSync = localStorage.getItem('muzaffar_last_sync');
+            if (!lastSync) {
+                console.log('Первая инициализация системы');
+            }
+        });
+    </script>
 </body>
 </html>
