@@ -42,11 +42,6 @@
             margin-bottom: 10px;
         }
 
-        .header p {
-            opacity: 0.9;
-            font-size: 14px;
-        }
-
         .content {
             padding: 30px;
         }
@@ -110,6 +105,7 @@
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s;
+            margin-bottom: 10px;
         }
 
         .btn-primary {
@@ -135,35 +131,6 @@
             color: white;
         }
 
-        .btn-warning:hover {
-            background: #e68900;
-        }
-
-        .btn-danger {
-            background: #f44336;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #da190b;
-        }
-
-        .btn-secondary {
-            background: #666;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #555;
-        }
-
-        .button-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin: 20px 0;
-        }
-
         .code-display {
             background: #f8f9fa;
             border: 2px dashed #1c92d2;
@@ -171,27 +138,18 @@
             padding: 20px;
             text-align: center;
             margin: 20px 0;
-            display: none;
         }
 
         .code-text {
             font-family: 'Courier New', monospace;
-            font-size: 18px;
+            font-size: 20px;
             font-weight: bold;
             color: #1c92d2;
             margin: 10px 0;
-        }
-
-        .code-info {
-            font-size: 12px;
-            color: #666;
-            margin-top: 10px;
-        }
-
-        .history {
-            max-height: 300px;
-            overflow-y: auto;
-            margin-top: 20px;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
         }
 
         .transaction {
@@ -210,27 +168,13 @@
             border-left-color: #ff9800;
         }
 
-        .transaction.admin {
-            border-left-color: #ffd700;
-        }
-
-        .transaction-header {
-            display: flex;
-            justify-content: space-between;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .transaction-amount {
-            font-weight: bold;
-        }
-
-        .transaction.received .transaction-amount {
-            color: #4CAF50;
-        }
-
-        .transaction.sent .transaction-amount {
-            color: #ff9800;
+        .info-box {
+            background: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: center;
         }
 
         .login-section {
@@ -241,47 +185,12 @@
             display: none;
         }
 
-        .admin-panel {
+        .test-accounts {
             background: #fff3cd;
-            border: 2px solid #ffeaa7;
+            border: 1px solid #ffeaa7;
             border-radius: 10px;
-            padding: 20px;
-            margin: 20px 0;
-            display: none;
-        }
-
-        .admin-panel h3 {
-            color: #856404;
-            margin-bottom: 15px;
-        }
-
-        .security-note {
-            background: #d4edda;
-            border: 1px solid #c3e6cb;
-            border-radius: 5px;
-            padding: 10px;
-            margin: 10px 0;
-            font-size: 12px;
-            color: #155724;
-        }
-
-        .new-badge {
-            background: #ff6b6b;
-            color: white;
-            padding: 2px 6px;
-            border-radius: 10px;
-            font-size: 10px;
-            margin-left: 5px;
-        }
-
-        .sync-notice {
-            background: #d1ecf1;
-            border: 1px solid #bee5eb;
-            border-radius: 5px;
-            padding: 10px;
-            margin: 10px 0;
-            font-size: 12px;
-            color: #0c5460;
+            padding: 15px;
+            margin: 15px 0;
         }
     </style>
 </head>
@@ -295,35 +204,23 @@
         <div class="content">
             <!-- Форма входа -->
             <div id="loginSection" class="login-section">
+                <h3 style="text-align: center; margin-bottom: 20px;">Вход в систему</h3>
+                
                 <div class="form-group">
                     <input type="text" id="username" placeholder="Имя пользователя" required>
                 </div>
                 <div class="form-group">
                     <input type="password" id="password" placeholder="Пароль" required>
                 </div>
-                <button class="btn-primary" onclick="login()">Войти</button>
-                <button class="btn-success" onclick="register()" style="margin-top: 10px;">Зарегистрироваться</button>
                 
-                <div class="sync-notice">
-                    🔄 <strong>Внимание:</strong> Для работы между устройствами используйте одинаковые браузеры или экспортируйте данные
-                </div>
+                <button class="btn-primary" onclick="login()">Войти</button>
+                <button class="btn-success" onclick="register()">Зарегистрироваться</button>
 
-                <div class="security-note">
-                    🔒 <strong>Безопасность:</strong> Пароли защищены шифрованием
-                </div>
-
-                <div style="margin-top: 20px; padding: 15px; background: #e7f3ff; border-radius: 10px;">
-                    <h4 style="margin-bottom: 10px;">Тестовые аккаунты:</h4>
-                    <p><strong>Админ:</strong> BankAdmin / bank_admin_secure_2024</p>
-                    <p><strong>Демо:</strong> demo / user_default_pass</p>
-                </div>
-
-                <!-- Экспорт/Импорт данных -->
-                <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 10px;">
-                    <h4 style="margin-bottom: 10px;">🔄 Синхронизация между устройствами</h4>
-                    <button class="btn-warning" onclick="exportData()" style="margin-bottom: 10px;">Экспорт данных</button>
-                    <button class="btn-success" onclick="importData()">Импорт данных</button>
-                    <textarea id="importExportData" placeholder="Вставьте данные для импорта..." style="width: 100%; height: 60px; margin-top: 10px; padding: 10px; border-radius: 5px; border: 1px solid #ddd; display: none;"></textarea>
+                <div class="test-accounts">
+                    <h4>📋 Тестовые аккаунты:</h4>
+                    <p><strong>Админ:</strong> admin / admin123</p>
+                    <p><strong>Пользователь:</strong> user / user123</p>
+                    <p style="font-size: 12px; color: #666;">Или создайте свой аккаунт</p>
                 </div>
             </div>
 
@@ -338,59 +235,45 @@
                     <div class="balance" id="balanceDisplay">0 ₮</div>
                     <div class="user-info">
                         <span>Muzaffar Pay</span>
-                        <span id="accountNumber">•••• 1234</span>
+                        <span id="accountNumber">•••• 0000</span>
                     </div>
+                </div>
+
+                <div class="info-box">
+                    💡 <strong>Как переводить деньги:</strong><br>
+                    1. Создайте код оплаты<br>
+                    2. Дайте код другому пользователю<br>
+                    3. Он введет код и получит деньги
                 </div>
 
                 <!-- Форма операций -->
                 <div class="form-group">
-                    <input type="number" id="amountInput" placeholder="Сумма перевода" min="1">
+                    <input type="number" id="amountInput" placeholder="Сумма перевода" min="1" value="100">
                 </div>
 
-                <div class="button-group">
-                    <button class="btn-primary" onclick="generatePaymentCode()">Создать код</button>
-                    <button class="btn-success" onclick="usePaymentCode()">Использовать код</button>
-                </div>
+                <button class="btn-primary" onclick="generatePaymentCode()">💰 Создать код оплаты</button>
+                <button class="btn-success" onclick="usePaymentCode()">🎯 Использовать код</button>
 
                 <!-- Отображение кода -->
-                <div id="codeDisplay" class="code-display">
-                    <div style="font-weight: bold; margin-bottom: 10px;">💰 Код оплаты</div>
+                <div id="codeDisplay" class="code-display" style="display: none;">
+                    <div style="font-weight: bold; margin-bottom: 10px;">✅ Код создан!</div>
                     <div class="code-text" id="codeText">BANK-XXXX-XXXX</div>
-                    <div class="code-info">
-                        ⚠️ Код можно использовать только один раз<br>
-                        💵 Сумма: <span id="codeAmount">0</span> ₮<br>
-                        🕒 Действителен: 24 часа
+                    <div style="font-size: 14px; color: #666; margin-top: 10px;">
+                        💰 Сумма: <span id="codeAmount">0</span> ₮<br>
+                        ⚠️ Дайте этот код другому пользователю
                     </div>
-                </div>
-
-                <!-- Кнопки администратора -->
-                <div id="adminButtonGroup" style="display: none;">
-                    <button class="btn-warning" onclick="toggleAdminPanel()">Панель администратора</button>
-                </div>
-
-                <!-- Панель администратора -->
-                <div id="adminPanel" class="admin-panel">
-                    <h3>🔧 Панель администратора</h3>
-                    <div class="button-group">
-                        <button class="btn-success" onclick="addFundsToAll()">➕ 1000 ₮ всем</button>
-                        <button class="btn-danger" onclick="resetAllBalances()">🔄 Обнулить счета</button>
-                    </div>
-                    <button class="btn-secondary" onclick="viewAllUsers()">👥 Все пользователи</button>
-                    <button class="btn-primary" onclick="syncAllDevices()" style="margin-top: 10px;">🔄 Синхронизировать устройства</button>
-                    
-                    <div id="usersList" style="margin-top: 15px;"></div>
                 </div>
 
                 <!-- История операций -->
-                <div class="history">
+                <div style="margin-top: 20px;">
                     <h3 style="margin-bottom: 15px;">📊 История операций</h3>
                     <div id="transactionsList">
-                        <!-- Транзакции будут здесь -->
+                        <!-- Транзакции появятся здесь -->
                     </div>
                 </div>
 
                 <!-- Кнопка выхода -->
-                <button class="btn-secondary" onclick="logout()" style="margin-top: 20px;">Выйти</button>
+                <button class="btn-warning" onclick="logout()" style="margin-top: 20px;">Выйти из аккаунта</button>
             </div>
         </div>
     </div>
@@ -398,187 +281,61 @@
     <script>
         // ==================== СИСТЕМА БАНКА ====================
         let currentUser = null;
-        let users = JSON.parse(localStorage.getItem('muzaffar_pay_users')) || [];
+        let users = JSON.parse(localStorage.getItem('muzaffar_users')) || [];
         let paymentCodes = JSON.parse(localStorage.getItem('muzaffar_payment_codes')) || [];
-        let currentDeviceId = localStorage.getItem('muzaffar_device_id') || generateDeviceId();
 
-        // Генерация ID устройства
-        function generateDeviceId() {
-            const id = 'device_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
-            localStorage.setItem('muzaffar_device_id', id);
-            return id;
-        }
-
-        // Инициализация системы
-        function initializeBankSystem() {
-            const adminPasswordHash = generateHash('bank_admin_secure_2024');
-            const demoPasswordHash = generateHash('user_default_pass');
-            
-            // Создаем админ аккаунт если не существует
-            if (!users.find(u => u.username === 'BankAdmin')) {
+        // Инициализация системы при загрузке
+        function initializeSystem() {
+            // Создаем тестовые аккаунты если их нет
+            if (!users.find(u => u.username === 'admin')) {
                 users.push({
-                    username: 'BankAdmin',
-                    passwordHash: adminPasswordHash,
-                    balance: 9999999,
+                    id: generateId(),
+                    username: 'admin',
+                    password: 'admin123',
+                    balance: 999999,
                     isAdmin: true,
-                    transactions: [
-                        {
-                            type: 'system',
-                            amount: 0,
-                            description: 'Админ аккаунт создан',
-                            date: new Date().toISOString(),
-                            isNew: false,
-                            deviceId: currentDeviceId
-                        }
-                    ],
-                    createdAt: new Date().toISOString(),
-                    accountNumber: '1001'
+                    accountNumber: '1001',
+                    transactions: [{
+                        type: 'system',
+                        amount: 0,
+                        description: 'Админ аккаунт создан',
+                        date: new Date().toISOString()
+                    }],
+                    createdAt: new Date().toISOString()
                 });
             }
-            
-            // Создаем демо аккаунт если не существует
-            if (!users.find(u => u.username === 'demo')) {
+
+            if (!users.find(u => u.username === 'user')) {
                 users.push({
-                    username: 'demo',
-                    passwordHash: demoPasswordHash,
+                    id: generateId(),
+                    username: 'user',
+                    password: 'user123',
                     balance: 1000,
                     isAdmin: false,
-                    transactions: [
-                        {
-                            type: 'system',
-                            amount: 0,
-                            description: 'Демо аккаунт создан',
-                            date: new Date().toISOString(),
-                            isNew: false,
-                            deviceId: currentDeviceId
-                        }
-                    ],
-                    createdAt: new Date().toISOString(),
-                    accountNumber: '2001'
+                    accountNumber: '2001',
+                    transactions: [{
+                        type: 'system',
+                        amount: 0,
+                        description: 'Аккаунт создан',
+                        date: new Date().toISOString()
+                    }],
+                    createdAt: new Date().toISOString()
                 });
             }
-            
-            // Очищаем просроченные коды
-            cleanupExpiredCodes();
-            
-            saveUsersData();
+
+            saveData();
         }
 
-        // Очистка просроченных кодов (24 часа)
-        function cleanupExpiredCodes() {
-            const now = new Date();
-            paymentCodes = paymentCodes.filter(code => {
-                const codeDate = new Date(code.createdAt);
-                const diffHours = (now - codeDate) / (1000 * 60 * 60);
-                return diffHours < 24 && !code.used;
-            });
+        function generateId() {
+            return Date.now().toString() + Math.random().toString(36).substr(2, 9);
         }
 
-        // Хеширование пароля
-        function generateHash(password) {
-            let hash = 0;
-            for (let i = 0; i < password.length; i++) {
-                const char = password.charCodeAt(i);
-                hash = ((hash << 5) - hash) + char;
-                hash = hash & hash;
-            }
-            return hash.toString();
-        }
-
-        function verifyPassword(inputPassword, storedHash) {
-            return generateHash(inputPassword) === storedHash;
-        }
-
-        // Сохранение данных
-        function saveUsersData() {
-            localStorage.setItem('muzaffar_pay_users', JSON.stringify(users));
+        function saveData() {
+            localStorage.setItem('muzaffar_users', JSON.stringify(users));
             localStorage.setItem('muzaffar_payment_codes', JSON.stringify(paymentCodes));
-            localStorage.setItem('muzaffar_last_sync', new Date().toISOString());
         }
 
-        // ==================== ЭКСПОРТ/ИМПОРТ ДАННЫХ ====================
-        function exportData() {
-            const data = {
-                users: users,
-                paymentCodes: paymentCodes,
-                exportDate: new Date().toISOString(),
-                deviceId: currentDeviceId
-            };
-            
-            const dataString = JSON.stringify(data, null, 2);
-            const textarea = document.getElementById('importExportData');
-            textarea.style.display = 'block';
-            textarea.value = dataString;
-            textarea.select();
-            document.execCommand('copy');
-            alert('Данные скопированы в буфер обмена! Вставьте их на другом устройстве.');
-        }
-
-        function importData() {
-            const textarea = document.getElementById('importExportData');
-            const dataString = textarea.value.trim();
-            
-            if (!dataString) {
-                alert('Вставьте данные для импорта');
-                return;
-            }
-            
-            try {
-                const data = JSON.parse(dataString);
-                
-                if (data.users && data.paymentCodes) {
-                    users = data.users;
-                    paymentCodes = data.paymentCodes;
-                    saveUsersData();
-                    
-                    // Обновляем текущего пользователя если он был авторизован
-                    if (currentUser) {
-                        const updatedUser = users.find(u => u.username === currentUser.username);
-                        if (updatedUser) {
-                            currentUser = updatedUser;
-                            updateUI();
-                        }
-                    }
-                    
-                    alert('Данные успешно импортированы!');
-                    textarea.style.display = 'none';
-                    textarea.value = '';
-                    
-                    // Перезагружаем интерфейс
-                    if (currentUser) {
-                        showMainInterface();
-                        updateUI();
-                    }
-                } else {
-                    alert('Неверный формат данных');
-                }
-            } catch (e) {
-                alert('Ошибка при импорте данных: ' + e.message);
-            }
-        }
-
-        // ==================== АУТЕНТИФИКАЦИЯ ====================
-        function login() {
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value;
-
-            if (!username || !password) {
-                alert('Введите имя пользователя и пароль');
-                return;
-            }
-
-            const user = users.find(u => u.username === username);
-            
-            if (user && verifyPassword(password, user.passwordHash)) {
-                currentUser = user;
-                showMainInterface();
-                updateUI();
-                alert(`Добро пожаловать, ${user.username}!`);
-            } else {
-                alert('Неверное имя пользователя или пароль');
-            }
-        }
-
+        // ==================== РЕГИСТРАЦИЯ И ВХОД ====================
         function register() {
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
@@ -599,34 +356,47 @@
             }
 
             const newUser = {
+                id: generateId(),
                 username: username,
-                passwordHash: generateHash(password),
+                password: password,
                 balance: 0,
                 isAdmin: false,
-                transactions: [
-                    {
-                        type: 'system',
-                        amount: 0,
-                        description: 'Аккаунт создан',
-                        date: new Date().toISOString(),
-                        isNew: true,
-                        deviceId: currentDeviceId
-                    }
-                ],
-                createdAt: new Date().toISOString(),
-                accountNumber: generateAccountNumber()
+                accountNumber: generateAccountNumber(),
+                transactions: [{
+                    type: 'system',
+                    amount: 0,
+                    description: 'Аккаунт создан',
+                    date: new Date().toISOString()
+                }],
+                createdAt: new Date().toISOString()
             };
 
             users.push(newUser);
-            saveUsersData();
+            saveData();
 
-            alert('Аккаунт успешно создан! Теперь вы можете войти.');
+            alert('✅ Аккаунт успешно создан! Теперь вы можете войти.');
             document.getElementById('username').value = '';
             document.getElementById('password').value = '';
         }
 
-        function generateAccountNumber() {
-            return Math.floor(2000 + Math.random() * 8000).toString();
+        function login() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+
+            if (!username || !password) {
+                alert('Введите имя пользователя и пароль');
+                return;
+            }
+
+            const user = users.find(u => u.username === username && u.password === password);
+
+            if (user) {
+                currentUser = user;
+                showMainInterface();
+                updateUI();
+            } else {
+                alert('❌ Неверное имя пользователя или пароль');
+            }
         }
 
         function logout() {
@@ -635,18 +405,20 @@
             document.getElementById('mainSection').style.display = 'none';
             document.getElementById('username').value = '';
             document.getElementById('password').value = '';
-            document.getElementById('adminPanel').style.display = 'none';
-            document.getElementById('importExportData').style.display = 'none';
+            document.getElementById('codeDisplay').style.display = 'none';
         }
 
-        // ==================== ИНТЕРФЕЙС ====================
+        function generateAccountNumber() {
+            return Math.floor(3000 + Math.random() * 7000).toString();
+        }
+
+        // ==================== ОСНОВНОЙ ИНТЕРФЕЙС ====================
         function showMainInterface() {
             document.getElementById('loginSection').style.display = 'none';
             document.getElementById('mainSection').style.display = 'block';
             
             if (currentUser.isAdmin) {
                 document.getElementById('adminBadge').style.display = 'inline';
-                document.getElementById('adminButtonGroup').style.display = 'block';
             }
         }
 
@@ -661,45 +433,42 @@
         }
 
         function formatBalance(amount) {
-            return amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+            return amount.toLocaleString('ru-RU', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         }
 
         function updateTransactionsList() {
             const list = document.getElementById('transactionsList');
             list.innerHTML = '';
 
-            currentUser.transactions.slice().reverse().forEach(transaction => {
+            // Сортируем транзакции от новых к старым
+            const sortedTransactions = [...currentUser.transactions].sort((a, b) => 
+                new Date(b.date) - new Date(a.date)
+            );
+
+            sortedTransactions.forEach(transaction => {
                 const transactionEl = document.createElement('div');
                 transactionEl.className = `transaction ${transaction.type}`;
                 
                 let amountHtml = '';
                 if (transaction.amount > 0) {
-                    amountHtml = `<span class="transaction-amount">+${transaction.amount} ₮</span>`;
+                    amountHtml = `<div style="color: #4CAF50; font-weight: bold;">+${transaction.amount} ₮</div>`;
                 } else if (transaction.amount < 0) {
-                    amountHtml = `<span class="transaction-amount">${transaction.amount} ₮</span>`;
+                    amountHtml = `<div style="color: #ff9800; font-weight: bold;">${transaction.amount} ₮</div>`;
                 }
 
                 transactionEl.innerHTML = `
-                    <div class="transaction-header">
-                        <span>${transaction.description}</span>
-                        ${amountHtml}
-                        ${transaction.isNew ? '<span class="new-badge">NEW</span>' : ''}
-                    </div>
-                    <div style="font-size: 12px; color: #666;">
-                        ${new Date(transaction.date).toLocaleString()}
-                        ${transaction.deviceId && transaction.deviceId !== currentDeviceId ? '🌐' : ''}
+                    <div style="font-weight: bold; margin-bottom: 5px;">${transaction.description}</div>
+                    ${amountHtml}
+                    <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                        ${new Date(transaction.date).toLocaleString('ru-RU')}
                     </div>
                 `;
                 
                 list.appendChild(transactionEl);
             });
-
-            // Помечаем транзакции как просмотренные
-            currentUser.transactions.forEach(t => t.isNew = false);
-            saveUsersData();
         }
 
-        // ==================== ОПЕРАЦИИ ====================
+        // ==================== ОПЕРАЦИИ С КОДАМИ ====================
         function generatePaymentCode() {
             const amount = parseFloat(document.getElementById('amountInput').value);
 
@@ -708,12 +477,12 @@
                 return;
             }
 
-            if (!currentUser.isAdmin && amount > currentUser.balance) {
-                alert('Недостаточно средств');
+            if (amount > currentUser.balance) {
+                alert('❌ Недостаточно средств');
                 return;
             }
 
-            // Админ может создавать коды без списания
+            // Списываем средства (кроме админа)
             if (!currentUser.isAdmin) {
                 currentUser.balance -= amount;
             }
@@ -721,74 +490,57 @@
             // Генерируем уникальный код
             const code = "BANK-" + 
                 Math.random().toString(36).substring(2, 6).toUpperCase() + "-" + 
-                Math.random().toString(36).substring(2, 6).toUpperCase() + "-" +
                 Date.now().toString(36).substring(4, 8).toUpperCase();
 
+            // Сохраняем код
             const codeData = {
                 code: code,
                 amount: amount,
                 createdBy: currentUser.username,
+                createdById: currentUser.id,
                 createdAt: new Date().toISOString(),
-                used: false,
-                usedBy: null,
-                deviceId: currentDeviceId,
-                codeId: 'code_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5)
+                used: false
             };
 
             paymentCodes.push(codeData);
-            saveUsersData();
-
-            // Показываем код
-            document.getElementById('codeText').textContent = code;
-            document.getElementById('codeAmount').textContent = amount;
-            document.getElementById('codeDisplay').style.display = 'block';
+            saveData();
 
             // Добавляем транзакцию
             currentUser.transactions.unshift({
                 type: 'sent',
                 amount: currentUser.isAdmin ? 0 : -amount,
                 description: `Создан код оплаты: ${code}`,
-                date: new Date().toISOString(),
-                isNew: true,
-                deviceId: currentDeviceId
+                date: new Date().toISOString()
+            });
+
+            // Показываем код
+            document.getElementById('codeText').textContent = code;
+            document.getElementById('codeAmount').textContent = amount;
+            document.getElementById('codeDisplay').style.display = 'block';
+
+            // Копируем в буфер обмена
+            navigator.clipboard.writeText(code).then(() => {
+                console.log('Код скопирован: ' + code);
             });
 
             updateUI();
-            
-            // Автоматически копируем код в буфер
-            navigator.clipboard.writeText(code).then(() => {
-                console.log('Код скопирован в буфер');
-            });
+            alert(`✅ Код создан!\nСумма: ${amount} ₮\nКод скопирован в буфер обмена`);
         }
 
         function usePaymentCode() {
             const code = prompt("Введите код оплаты:");
             if (!code) return;
 
-            const codeData = paymentCodes.find(c => c.code === code);
+            // Ищем код
+            const codeData = paymentCodes.find(c => c.code === code && !c.used);
 
             if (!codeData) {
-                alert("Код не найден. Убедитесь, что данные синхронизированы между устройствами.");
+                alert("❌ Код не найден или уже использован!");
                 return;
             }
 
-            if (codeData.used) {
-                alert("Код уже использован");
-                return;
-            }
-
-            if (codeData.createdBy === currentUser.username) {
-                alert("Нельзя использовать свой собственный код");
-                return;
-            }
-
-            // Проверяем срок действия кода (24 часа)
-            const codeDate = new Date(codeData.createdAt);
-            const now = new Date();
-            const diffHours = (now - codeDate) / (1000 * 60 * 60);
-            
-            if (diffHours > 24) {
-                alert("Код просрочен (действителен 24 часа)");
+            if (codeData.createdById === currentUser.id) {
+                alert("⚠️ Нельзя использовать свой собственный код!");
                 return;
             }
 
@@ -805,110 +557,40 @@
                 type: 'received',
                 amount: codeData.amount,
                 description: `Получен перевод (код: ${code}) от ${codeData.createdBy}`,
-                date: new Date().toISOString(),
-                isNew: true,
-                deviceId: currentDeviceId
+                date: new Date().toISOString()
             });
 
-            saveUsersData();
+            saveData();
             updateUI();
             
             document.getElementById('codeDisplay').style.display = 'none';
-            alert(`Успешно получено ${codeData.amount} ₮ от ${codeData.createdBy}!`);
+            alert(`✅ Успешно получено ${codeData.amount} ₮ от ${codeData.createdBy}!`);
         }
 
-        // ==================== АДМИН ПАНЕЛЬ ====================
-        function toggleAdminPanel() {
-            const panel = document.getElementById('adminPanel');
-            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-        }
-
-        function addFundsToAll() {
-            if (!currentUser || !currentUser.isAdmin) return;
-
-            users.forEach(user => {
-                if (!user.isAdmin) {
-                    user.balance += 1000;
-                    user.transactions.unshift({
-                        type: 'received',
-                        amount: 1000,
-                        description: 'Админ: Начислено 1000 ₮',
-                        date: new Date().toISOString(),
-                        isNew: true,
-                        deviceId: currentDeviceId
-                    });
-                }
-            });
-
-            saveUsersData();
-            alert('Всем пользователям начислено по 1000 ₮!');
+        // ==================== ЗАГРУЗКА СИСТЕМЫ ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeSystem();
             
-            // Обновляем интерфейс если текущий пользователь не админ
-            if (!currentUser.isAdmin) {
-                const updatedUser = users.find(u => u.username === currentUser.username);
-                if (updatedUser) {
-                    currentUser = updatedUser;
+            // Проверяем, не авторизован ли пользователь
+            const savedUser = localStorage.getItem('muzaffar_current_user');
+            if (savedUser) {
+                const userData = JSON.parse(savedUser);
+                const user = users.find(u => u.id === userData.id);
+                if (user) {
+                    currentUser = user;
+                    showMainInterface();
                     updateUI();
                 }
             }
-        }
+        });
 
-        function resetAllBalances() {
-            if (!currentUser || !currentUser.isAdmin) return;
-
-            if (confirm('Вы уверены, что хотите обнулить все счета (кроме админа)?')) {
-                users.forEach(user => {
-                    if (!user.isAdmin) {
-                        user.balance = 0;
-                        user.transactions.unshift({
-                            type: 'system',
-                            amount: 0,
-                            description: 'Админ: Счет обнулен',
-                            date: new Date().toISOString(),
-                            isNew: true,
-                            deviceId: currentDeviceId
-                        });
-                    }
-                });
-
-                saveUsersData();
-                alert('Все счета обнулены!');
-                
-                if (!currentUser.isAdmin) {
-                    const updatedUser = users.find(u => u.username === currentUser.username);
-                    if (updatedUser) {
-                        currentUser = updatedUser;
-                        updateUI();
-                    }
-                }
-            }
-        }
-
-        function viewAllUsers() {
-            if (!currentUser || !currentUser.isAdmin) return;
-
-            const usersList = document.getElementById('usersList');
-            usersList.innerHTML = users.map(user => `
-                <div style="padding: 10px; margin: 5px 0; background: white; border-radius: 5px; border: 1px solid #ddd;">
-                    <strong>${user.username}</strong> ${user.isAdmin ? '👑' : ''}<br>
-                    Баланс: ${user.balance} ₮ | Счет: ${user.accountNumber}<br>
-                    <small>Транзакций: ${user.transactions.length} | Создан: ${new Date(user.createdAt).toLocaleDateString()}</small>
-                </div>
-            `).join('');
-        }
-
-        function syncAllDevices() {
-            exportData();
-        }
-
-        // ==================== ИНИЦИАЛИЗАЦИЯ ====================
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeBankSystem();
-            
-            // Показываем уведомление о синхронизации
-            const lastSync = localStorage.getItem('muzaffar_last_sync');
-            if (!lastSync) {
-                console.log('Первая инициализация системы');
+        // Сохраняем текущего пользователя при закрытии
+        window.addEventListener('beforeunload', function() {
+            if (currentUser) {
+                localStorage.setItem('muzaffar_current_user', JSON.stringify({
+                    id: currentUser.id,
+                    username: currentUser.username
+                }));
             }
         });
     </script>
